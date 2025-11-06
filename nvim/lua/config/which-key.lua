@@ -108,7 +108,8 @@ local function normal_keymap()
 			q = { "<cmd>lua require('telescope.builtin').quickfix()<cr>", "Quickfix" },
 			t = { "<cmd>Telescope telescope-tabs list_tabs<cr>", "Tabs" },
 			w = { "<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>", "Current Buffer" },
-			n = { "<cmd>Explore<cr>", "netrw" },
+			--n = { "<cmd>Explore<cr>", "netrw" },
+			n = { "<cmd>Oil<cr>", "Oil" },
 			e = { "<cmd>Oil --float<cr>", "Oil Float" },
 			a = { "<cmd>Telescope aerial<cr>", "Aerial" },
 		},
@@ -541,8 +542,15 @@ local function code_keymap()
 				F = { "<cmd>TypescriptFixAll<cr>", "Fix All" },
 				u = { "<cmd>TypescriptRemoveUnused<cr>", "Remove Unused" },
 				R = { "<cmd>lua require('config.test').javascript_runner()<cr>", "Choose Test Runner" },
-				-- s = { "<cmd>2TermExec cmd='yarn start'<cr>", "Yarn Start" },
-				-- t = { "<cmd>2TermExec cmd='yarn test'<cr>", "Yarn Test" },
+				t = {
+					name = "Test",
+					a = { "<cmd>lua require('config.test').run_all_tests()<cr>", "Run All Tests" },
+					f = { "<cmd>lua require('config.test').run_current_file()<cr>", "Run Current File" },
+					n = { "<cmd>lua require('config.test').run_nearest_test()<cr>", "Run Nearest Test" },
+					w = { "<cmd>lua require('config.test').watch_tests()<cr>", "Watch All Tests" },
+					W = { "<cmd>lua require('config.test').watch_current_file()<cr>", "Watch Current File" },
+					r = { "<cmd>lua require('config.test').run_failed_tests()<cr>", "Run Failed Tests" },
+				},
 			}
 		elseif ft == "java" then
 			keymap_c = {

@@ -141,6 +141,7 @@ require("lazy").setup({
 					require("nvim-treesitter.configs").setup({ autotag = { enable = true } })
 				end,
 			},
+			--{ "OXY2DEV/markview.nvim" },
 		},
 	},
 
@@ -289,7 +290,7 @@ require("lazy").setup({
 	-- Terminal
 	{
 		"akinsho/toggleterm.nvim",
-		keys = { [[<C-\>]] },
+		keys = { [[<C-`>]], [[<C-\>]] },
 		cmd = { "ToggleTerm", "TermExec" },
 		config = function()
 			require("config.toggleterm").setup()
@@ -512,6 +513,18 @@ require("lazy").setup({
 		end,
 		enabled = true,
 	},
+	{
+		"OXY2DEV/markview.nvim",
+		lazy = false,
+	},
+	{
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		ft = { "markdown" },
+		build = function()
+			vim.fn["mkdp#util#install"]()
+		end,
+	},
 
 	-- Better navigation with Tab
 	{
@@ -519,6 +532,7 @@ require("lazy").setup({
 		config = function()
 			require("smart-tab").setup()
 		end,
+		enabled = false,
 	},
 
 	-- Improved quickfix list
@@ -560,5 +574,59 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader><leader>i", require("smart-splits").swap_buf_up)
 			vim.keymap.set("n", "<leader><leader>o", require("smart-splits").swap_buf_right)
 		end,
+	},
+
+	{
+		"kristijanhusak/vim-dadbod-ui",
+		dependencies = {
+			{ "tpope/vim-dadbod", lazy = true },
+			{ "kristijanhusak/vim-dadbod-completion", ft = { "sql", "mysql", "plsql" }, lazy = true }, -- Optional
+		},
+		cmd = {
+			"DBUI",
+			"DBUIToggle",
+			"DBUIAddConnection",
+			"DBUIFindBuffer",
+		},
+		init = function()
+			-- Your DBUI configuration
+			vim.g.db_ui_use_nerd_fonts = 1
+		end,
+		config = function()
+			vim.g.dbs = {
+				{ name = "arcola", url = "postgres://postgres:captech01@localhost:3306/postgres" },
+				{ name = "arcola_dev", url = "postgres://dev_user:bxujQqMqrDiNHPvH@127.0.0.1:5001/dev" },
+				{ name = "arcola_qa", url = "postgres://qa_user:5MA3wHSKoBdvw90O@127.0.0.1:5001/qa" },
+				{ name = "arcola_prod", url = "postgres://prod_user:pLAPQPraeUqmNAum@127.0.0.1:5001/prod" },
+			}
+		end,
+	},
+	{
+		"kndndrj/nvim-dbee",
+		dependencies = {
+			"MunifTanjim/nui.nvim",
+		},
+		build = function()
+			-- Install tries to automatically detect the install method.
+			-- if it fails, try calling it with one of these parameters:
+			--    "curl", "wget", "bitsadmin", "go"
+			require("dbee").install()
+		end,
+		config = function()
+			require("dbee").setup({
+				sources = {
+					require("dbee.sources").MemorySource:new({
+						{
+							name = "Arcola DB",
+							type = "postgres",
+							url = "postgres://postgres:captech01@localhost:3306/postgres?sslmode=disable",
+						},
+					}),
+					require("dbee.sources").EnvSource:new("DBEE_CONNECTIONS"),
+					require("dbee.sources").FileSource:new(vim.fn.stdpath("cache") .. "/dbee/persistence.json"),
+				},
+			})
+		end,
+		enabled = false,
 	},
 })

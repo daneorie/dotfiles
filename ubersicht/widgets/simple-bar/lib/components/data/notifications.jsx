@@ -26,7 +26,7 @@ let database;
 async function getDatabase() {
   return (
     await Uebersicht.run(
-      `lsof -p "$(ps aux | grep -m1 usernoted | awk '{ print $2 }')" | awk '{ print $NF }' | grep 'db2/db$'`
+      `lsof -p "$(ps aux | grep -m1 usernoted | awk '{ print $2 }')" | grep 'db2/db$' | sed 's/[^/]*\\//\\//'`
     )
   ).trim();
 }
@@ -44,25 +44,25 @@ export const Widget = () => {
     if (!database) database = await getDatabase();
 
     // handle default execution
-    const defaultList = Object.keys(AppNotifications.methods.default)
-      .filter((appName) => notificationWidgetOptions[AppOptions.apps[appName]])
-      .map((appName) => AppIdentifiers.apps[appName]);
-    const defaultResponse = await Uebersicht.run(
-      `./simple-bar/lib/scripts/notifications-default.sh "${database}" "${defaultList.join(
-        "', '"
-      )}"`
-    );
-    const defaultAppBadgeJsonList = JSON.parse(defaultResponse);
-    function getAppNameByIdentifier(object, value) {
-      return Object.keys(object).find((key) => object[key] === value);
-    }
-    defaultAppBadgeJsonList.forEach((appObject) => {
-      const appName = getAppNameByIdentifier(
-        AppIdentifiers.apps,
-        appObject.identifier
-      );
-      setState((state) => ({ ...state, [appName]: appObject.badge }));
-    });
+    //const defaultList = Object.keys(AppNotifications.methods.default)
+    //  .filter((appName) => notificationWidgetOptions[AppOptions.apps[appName]])
+    //  .map((appName) => AppIdentifiers.apps[appName]);
+    //const defaultResponse = await Uebersicht.run(
+    //  `./simple-bar/lib/scripts/notifications-default.sh "${database}" "${defaultList.join(
+    //    "', '"
+    //  )}"`
+    //);
+    //const defaultAppBadgeJsonList = JSON.parse(defaultResponse);
+    //function getAppNameByIdentifier(object, value) {
+    //  return Object.keys(object).find((key) => object[key] === value);
+    //}
+    //defaultAppBadgeJsonList.forEach((appObject) => {
+    //  const appName = getAppNameByIdentifier(
+    //    AppIdentifiers.apps,
+    //    appObject.identifier
+    //  );
+    //  setState((state) => ({ ...state, [appName]: appObject.badge }));
+    //});
 
     // handle python execution
     const pythonResponse = await Uebersicht.run(

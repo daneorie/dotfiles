@@ -97,8 +97,8 @@ shift + alt - p : yabai -m window --display previous; yabai -m display --focus p
 
 # restart
 meh - u: ~/dotfiles/ubersicht/restart_ubersicht.sh
-meh - y: kill -9 $(ps -ef | awk '{ if ($8 == "/usr/local/opt/yabai/bin/yabai") { print $2 } }')
-meh - s: kill -9 $(ps -ef | awk '{ if ($8 == "/usr/local/opt/skhd/bin/skhd") { print $2 } }')
+meh - y: kill -9 $(ps -ef | awk '{ if ($8 == "/opt/homebrew/opt/yabai/bin/yabai") { print $2 } }')
+meh - s: kill -9 $(ps -ef | awk '{ if ($8 == "/opt/homebrew/opt/skhd/bin/skhd") { print $2 } }')
 
 # change the sound input and output
 #hyper - 3: open "~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/Set Sound Control Output Device - Output1.app"

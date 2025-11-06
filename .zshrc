@@ -1,6 +1,6 @@
 export NVIM_HOME=~/.config/nvim
 export MAVEN_HOME=~/apache-maven-3.8.1
-export WIKI_HOME=~/wiki
+export WIKI_HOME=~/Documents/wiki
 export XDG_CONFIG_HOME="$HOME/.config"
 
 if [[ -n "/usr/local/bin/brew" ]]; then
@@ -11,7 +11,6 @@ fi
 paths_to_add=(
 	"/usr/local/sbin"
 	"$MAVEN_HOME/bin"
-	"$HOME/.jenv/bin"
 )
 # Add paths to PATH if they don't already exist
 for path_to_add in "${paths_to_add[@]}"; do
@@ -51,6 +50,7 @@ alias cdu='cd-gitroot'
 alias less="$(brew --prefix)/Cellar/less/590/bin/less"
 alias excel="open -a /Applications/Microsoft\ Excel.app"
 alias refresh="exec $SHELL -l"
+alias wiki="cd $WIKI_HOME && nvim index.md"
 
 
 # git aliases
@@ -75,8 +75,7 @@ alias yqwd='yqw --display'
 alias testGithub='ssh -T git@github.com'
 
 export KEYTIMEOUT=1 # this lowers the time it takes to switch from viins to vicmd and vice versa
-eval "$(jenv init -)"
-eval "$(rbenv init - zsh)"
+#eval "$(rbenv init - zsh)"
 
 # Plugins (Antigen)
 source /usr/local/share/antigen/antigen.zsh
@@ -162,7 +161,15 @@ set-prompt() {
 	fi
 }
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf.zsh ] && source <(fzf --zsh)
 
 # Created by `pipx` on 2023-05-18 05:50:54
 export PATH="$PATH:/Users/daneorie/.local/bin"
+
+# bun completions
+[ -s "/Users/dorie/.bun/_bun" ] && source "/Users/dorie/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"

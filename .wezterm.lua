@@ -1,6 +1,18 @@
 -- Pull in the wezterm API
 local wezterm = require("wezterm")
+local session_manager = require("wezterm-session-manager/session-manager")
 local act = wezterm.action
+
+-- Session Management
+wezterm.on("save_session", function(window)
+	session_manager.save_state(window)
+end)
+wezterm.on("load_session", function(window)
+	session_manager.load_state(window)
+end)
+wezterm.on("restore_session", function(window)
+	session_manager.restore_state(window)
+end)
 
 -- This table will hold the configuration.
 local config = {}
@@ -19,6 +31,20 @@ config.enable_kitty_keyboard = true
 config.tab_bar_at_bottom = true
 config.window_decorations = "RESIZE"
 config.use_fancy_tab_bar = false
+
+local bare_repos = {
+	"sports-fan365-backend",
+	"sports-fan365-backend/feature",
+	--"sports-fan365-backend-old",
+	--"sports-fan365-backend-old/feature",
+	"broski_orie",
+	"arcolla-backend",
+	"arcolla-backend/feature",
+	"arcolavfd-web",
+	"arcolavfd-web/feature",
+	"mtgt",
+	--"advent-of-code-2023",
+}
 
 -- if you are *NOT* lazy-loading smart-splits.nvim (recommended)
 local function is_inside_vim(pane)
@@ -68,7 +94,11 @@ end
 
 -- Equivalent to POSIX basename(3)
 local function basename(s)
-	return s:gsub("(.*[/\\])(.*)", "%2")
+	local current_dir = tostring(s)
+	if type(s) == "userdata" then
+		current_dir = unescape(current_dir)
+	end
+	return current_dir:gsub("(.*[/\\])(.*)", "%2")
 end
 
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
@@ -152,6 +182,9 @@ config.keys = {
 	{ key = "r", mods = "LEADER", action = act.ActivateKeyTable({ name = "resize_pane", one_shot = false }) },
 	{ key = "l", mods = "LEADER", action = act.EmitEvent("toggle-ligatures") },
 	{ key = "t", mods = "LEADER", action = act.EmitEvent("toggle-transparency") },
+	{ key = "s", mods = "LEADER|SHIFT", action = wezterm.action({ EmitEvent = "save_session" }) },
+	{ key = "l", mods = "LEADER|SHIFT", action = wezterm.action({ EmitEvent = "load_session" }) },
+	{ key = "r", mods = "LEADER|SHIFT", action = wezterm.action({ EmitEvent = "restore_session" }) },
 
 	-- basic usage
 	{ key = "c", mods = SUPER, action = act.CopyTo("Clipboard") },
@@ -264,15 +297,49 @@ config.keys = {
 		action = wezterm.action_callback(function(window, pane)
 			local home = wezterm.glob(wezterm.home_dir)[1]
 			local workspaces = {
-				{ id = home .. "/dotfiles|", label = home .. "/dotfiles" },
-				{ id = "~/wiki|/home/linuxbrew/.linuxbrew/bin/nvim index.md", label = home .. "/wiki" },
+				{ id = home .. "/dotfiles||dotfiles", label = home .. "/dotfiles" },
+				{ id = home .. "/wiki||wiki", label = home .. "/wiki" },
+				{ id = home .. "/repos||repos", label = home .. "/repos" },
+				{
+					id = "|ssh -i ~/.ssh/personal.rsa daneorie@macbook-pro.local|personal",
+					label = "ssh macbook-pro.local",
+				},
 			}
 
+			-- Add all GitHub repos except the bare repos (worktrees)
 			for _, path in ipairs(wezterm.glob(home .. "/repos/*")) do
-				table.insert(workspaces, {
-					id = path .. "|",
-					label = path,
-				})
+				local name = path:gsub(".*/", "")
+				if not has_value(bare_repos, name) then
+					table.insert(workspaces, {
+						id = path .. "||" .. path:gsub(home .. "/", ""),
+						label = path,
+					})
+				end
+			end
+
+			local worktree_dirs = {
+				"HEAD",
+				"config",
+				"description",
+				"hooks",
+				"info",
+				"logs",
+				"objects",
+				"packed-refs",
+				"refs",
+				"worktrees",
+			}
+
+			for _, dir in ipairs(bare_repos) do
+				for _, path in ipairs(wezterm.glob(home .. "/repos/" .. dir .. "/*")) do
+					local name = path:gsub(".*/", "")
+					if not has_value(worktree_dirs, name) then
+						table.insert(workspaces, {
+							id = path .. "||" .. path:gsub(home .. "/repos/", ""),
+							label = path,
+						})
+					end
+				end
 			end
 
 			window:perform_action(
@@ -281,15 +348,18 @@ config.keys = {
 						if not id and not label then
 							wezterm.log_info("cancelled")
 						else
-							local name = label:gsub("^.*/", "")
-							local cwd = id:gsub("|.*", "")
-							local args = mysplit(id:gsub(".*|", ""), " ")
-							wezterm.log_info("name = " .. name)
+							local split_id = split(id, "|")
+							local cwd = split_id[1]
+							local args = split(split_id[2], " ")
+							local name = split_id[3]
 							wezterm.log_info("label = " .. label)
 							wezterm.log_info("cwd = " .. cwd)
+							for index, arg in ipairs(args) do
+								wezterm.log_info("arg#" .. index .. " = " .. tostring(arg))
+							end
+							wezterm.log_info("name = " .. name)
 							inner_window:perform_action(
 								act.SwitchToWorkspace({
-									--name = label,
 									name = name,
 									spawn = {
 										label = "Workspace: " .. label,
@@ -309,24 +379,95 @@ config.keys = {
 			)
 		end),
 	},
+
+	-- switch between open workspaces
+	{
+		key = "s",
+		mods = SUPER .. "|CTRL|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			local workspaces = {}
+			local workspace_names = wezterm.mux.get_workspace_names()
+			for _, workspace in ipairs(workspace_names) do
+				table.insert(workspaces, {
+					id = workspace,
+					label = workspace,
+				})
+			end
+			wezterm.log_info(workspaces)
+			window:perform_action(
+				act.InputSelector({
+					action = wezterm.action_callback(function(inner_window, inner_pane, id, label)
+						if not id and not label then
+							wezterm.log_info("cancelled")
+						else
+							wezterm.log_info("label = " .. label)
+							wezterm.log_info("name = " .. id)
+							inner_window:perform_action(
+								act.SwitchToWorkspace({
+									name = id,
+									spawn = {
+										label = "Workspace: " .. label,
+									},
+								}),
+								inner_pane
+							)
+						end
+					end),
+					title = "Choose Workspace",
+					choices = workspaces,
+					fuzzy = true,
+				}),
+				pane
+			)
+		end),
+	},
 }
 
-for i = 1, 9 do
+for i = 1, 10 do
 	-- SUPER + number to activate that numbered tab
 	table.insert(config.keys, {
-		key = tostring(i),
+		key = tostring(i % 10),
 		mods = SUPER,
 		action = act.ActivateTab(i - 1),
 	})
 end
 
-function mysplit(inputstr, sep)
-	if sep == nil then
-		sep = "%s"
+function split(inputstr, sep)
+	if inputstr == "" then
+		return {}
 	end
+	sep = sep or "%s"
 	local t = {}
-	for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
-		table.insert(t, str)
+	for field, s in inputstr:gmatch("([^" .. sep .. "]*)(" .. sep .. "?)") do
+		table.insert(t, field)
+		if s == "" then
+			return t
+		end
+	end
+	return t
+end
+
+function has_value(tab, val)
+	for _, value in ipairs(tab) do
+		if value == val then
+			return true
+		end
+	end
+	return false
+end
+
+function hex_to_char(x)
+	return string.char(tonumber(x, 16))
+end
+
+function unescape(url)
+	return url:gsub("%%(%x%x)", hex_to_char)
+end
+
+function map(things)
+	local t = {}
+	for key in things:gmatch("([^,]+)") do
+		table.insert(t, act.SendKey({ key = key }))
 	end
 	return t
 end
@@ -348,6 +489,23 @@ config.key_tables = {
 		{ key = "RightArrow", action = act.AdjustPaneSize({ "Right", 1 }) },
 		{ key = "o", mods = "NONE", action = act.AdjustPaneSize({ "Right", 1 }) },
 		{ key = "o", mods = "SHIFT", action = act.AdjustPaneSize({ "Right", 5 }) },
+
+		-- Neovim panes
+		--map({ "n", "v", "i" }, "<A-Left>", ":vertical resize -2<CR>") -- decrease width
+		{ key = "m", mods = "NONE", action = act.Multiple(map("Escape,:,v,e,r,t,i,c,a,l, ,r,e,s,i,z,e, ,-,1,Enter")) },
+		{ key = "m", mods = "SHIFT", action = act.Multiple(map("Escape,:,v,e,r,t,i,c,a,l, ,r,e,s,i,z,e, ,-,5,Enter")) },
+
+		--map({ "n", "v", "i" }, "<A-Down>", ":resize -2<CR>") -- decrease height
+		{ key = ",", mods = "NONE", action = act.Multiple(map("Escape,:,r,e,s,i,z,e, ,-,1,Enter")) },
+		{ key = "<", mods = "SHIFT", action = act.Multiple(map("Escape,:,r,e,s,i,z,e, ,-,5,Enter")) },
+
+		--map({ "n", "v", "i" }, "<A-Up>", ":resize +2<CR>") -- increase height
+		{ key = ".", mods = "NONE", action = act.Multiple(map("Escape,:,r,e,s,i,z,e, ,+,1,Enter")) },
+		{ key = ">", mods = "SHIFT", action = act.Multiple(map("Escape,:,r,e,s,i,z,e, ,+,5,Enter")) },
+
+		--map({ "n", "v", "i" }, "<A-Right>", ":vertical resize +2<CR>") -- increase width
+		{ key = "/", mods = "NONE", action = act.Multiple(map("Escape,:,v,e,r,t,i,c,a,l, ,r,e,s,i,z,e, ,+,1,Enter")) },
+		{ key = "?", mods = "SHIFT", action = act.Multiple(map("Escape,:,v,e,r,t,i,c,a,l, ,r,e,s,i,z,e, ,+,5,Enter")) },
 
 		-- Cancel the mode by pressing escape
 		{ key = "Escape", action = "PopKeyTable" },

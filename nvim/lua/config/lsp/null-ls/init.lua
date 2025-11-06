@@ -18,6 +18,17 @@ end
 --	}
 --end
 
+local eslint_config = {
+	condition = function (utils)
+		utils.root_has_file({
+			"eslint.config.js",
+			".eslintrc",
+			".eslintrc.js",
+			".eslintrc.json",
+		})
+	end
+}
+
 local sources = {
 	-- formatting
 	b.formatting.prettierd,
@@ -32,7 +43,7 @@ local sources = {
 
 	-- diagnostics
 	--b.diagnostics.write_good,
-	b.diagnostics.eslint_d,
+	b.diagnostics.eslint_d.with(eslint_config),
 	--b.diagnostics.markdownlint,
 	--b.diagnostics.flake8.with { extra_args = { "--max-line-length=180" } },
 	b.diagnostics.ruff.with({ extra_args = { "--max-line-length=180" } }),
@@ -52,7 +63,7 @@ local sources = {
 	b.code_actions.gitsigns.with({
 		disabled_filetypes = { "NeogitCommitMessage" },
 	}),
-	b.code_actions.eslint_d,
+	b.code_actions.eslint_d.with(eslint_config),
 	b.code_actions.gitrebase,
 	b.code_actions.refactoring,
 	b.code_actions.proselint,
