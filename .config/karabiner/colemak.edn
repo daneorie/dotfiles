@@ -1,0 +1,23 @@
+    {:des "Colemak Layout"
+     :rules [
+        [:##e :f]
+        [:##r :p]
+        [:##t :g]
+        [:##y :j]
+        [:##u :l]
+        [:##i :u]
+        [:##o :y]
+        [:##p :semicolon]
+        [:##s :r]
+        [:##d :s]
+        [:##f :t]
+        [:##g :d]
+        [:##j :n]
+        [:##k :e]
+        [:##l :i]
+        [:##semicolon :o]
+        [:##n :k]
+        [:##caps_lock :delete_or_backspace]
+        [:##delete_or_backspace :caps_lock]
+      ]
+     }

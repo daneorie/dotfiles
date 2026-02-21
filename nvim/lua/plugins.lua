@@ -1,4 +1,5 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
@@ -67,8 +68,12 @@ require("lazy").setup({
 			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
-			--require("octo").setup()
-			require("octo").setup({ enable_builtin = true })
+			require("octo").setup({
+				enable_builtin = true,
+				suppress_missing_scope = {
+					projects_v2 = true,
+				},
+			})
 			vim.cmd([[hi OctoEditable guibg=none]])
 		end,
 	},
@@ -132,6 +137,18 @@ require("lazy").setup({
 		build = ":TSUpdate",
 		config = function()
 			require("config.treesitter").setup()
+			--local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+			--parser_config.http = {
+			--	install_info = {
+			--		url = "~/repos/tree-sitter-http", -- local path or git repo
+			--		files = { "src/parser.c" }, -- note that some parsers also require src/scanner.c or src/scanner.cc
+			--		-- optional entries:
+			--		branch = "main", -- default branch in case of git repo if different from master
+			--		generate_requires_npm = false, -- if stand-alone parser without npm dependencies
+			--		requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
+			--	},
+			--	filetype = "http", -- if filetype does not match the parser name
+			--}
 		end,
 		dependencies = {
 			{ "nvim-treesitter/nvim-treesitter-textobjects", event = "BufReadPre" },
@@ -260,7 +277,8 @@ require("lazy").setup({
 			"folke/neodev.nvim",
 			"b0o/schemastore.nvim",
 			"jose-elias-alvarez/typescript.nvim",
-			"jose-elias-alvarez/null-ls.nvim", -- for formatters and linters
+			--"jose-elias-alvarez/null-ls.nvim", -- for formatters and linters
+			"nvimtools/none-ls.nvim",
 			"lvimuser/lsp-inlayhints.nvim",
 			"ray-x/lsp_signature.nvim",
 			"pierreglaser/folding-nvim",
@@ -295,7 +313,7 @@ require("lazy").setup({
 	-- Terminal
 	{
 		"akinsho/toggleterm.nvim",
-		keys = { [[<C-\>]] },
+		keys = { [[<C-`>]], [[<C-\>]] },
 		cmd = { "ToggleTerm", "TermExec" },
 		config = function()
 			require("config.toggleterm").setup()
@@ -371,6 +389,7 @@ require("lazy").setup({
 				"nvim-nio",
 				"mimetypes",
 				"xml2lua",
+				"magick",
 			},
 		},
 		priority = 1000,
@@ -435,14 +454,14 @@ require("lazy").setup({
 	},
 
 	-- Go
-	--{
-	--	"ray-x/go.nvim",
-	--	ft = { "go" },
-	--	config = function()
-	--		require("go").setup()
-	--	end,
-	--	enabled = false,
-	--},
+	{
+		"ray-x/go.nvim",
+		ft = { "go" },
+		config = function()
+			require("go").setup()
+		end,
+		enabled = true,
+	},
 
 	-- Java
 	{
@@ -516,6 +535,22 @@ require("lazy").setup({
 		end,
 		enabled = true,
 	},
+	{
+		"OXY2DEV/markview.nvim",
+		lazy = false,
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
+	},
+	{
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		ft = { "markdown" },
+		build = function()
+			vim.fn["mkdp#util#install"]()
+		end,
+	},
 
 	-- Better navigation with Tab
 	{
@@ -523,6 +558,7 @@ require("lazy").setup({
 		config = function()
 			require("smart-tab").setup()
 		end,
+		enabled = false,
 	},
 
 	-- Improved quickfix list
@@ -544,6 +580,14 @@ require("lazy").setup({
 		end,
 	},
 
+	-- Kitty Images
+	{
+		"3rd/image.nvim",
+		config = function()
+			-- ...
+		end,
+	},
+
 	-- Markdown Images
 	{
 		"edluffy/hologram.nvim",
@@ -553,6 +597,12 @@ require("lazy").setup({
 			})
 		end,
 		enabled = false,
+	},
+
+	-- This prevents embedded instances of NVIM, which can happen when doing `git commit`, for example
+	{
+		"brianhuster/unnest.nvim",
+		lazy = false,
 	},
 
 	{

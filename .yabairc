@@ -125,5 +125,10 @@ yabai -m rule --add manage=off label="off:Homerow|General" app="^Homerow$" title
 yabai -m rule --add manage=off label="off:Homerow|Exceptions" app="^Homerow$" title="^Exceptions$"
 yabai -m rule --add manage=off label="off:Reminders|Settings" app="^Reminders$" title="^Settings$"
 yabai -m rule --add manage=off label="off:Talon|About Talon" app="^Talon$" title="^About Talon$"
+yabai -m rule --add manage=off label="off:Shortcuts|All Shortcuts" app="^Shortcuts$" title="^All Shortcuts$"
+yabai -m rule --add manage=off label="off:iPhone Mirroring" app="^iPhone Mirroring$"
+yabai -m rule --add manage=off label="off:Discord" app="^Discord$"
+yabai -m rule --add manage=off label="off:System Information|" app="^System Information$" title="^$"
+yabai -m rule --add manage=off label="off:Backblaze Downloader|Backblaze Downloader" app="^Backblaze Downloader$" title="^Backblaze Downloader$"
 
 echo "yabai configuration loaded..."

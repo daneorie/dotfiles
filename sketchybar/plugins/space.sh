@@ -1,129 +1,52 @@
-#!/bin/sh
-source "$HOME/.config/sketchybar/colors.sh"
-source "$HOME/.config/sketchybar/state.sh"
+#!/bin/bash
 
-activate_space() {
-if [ -z "${SID+x}" ] || [ -z "${SID}" ] || [ -z "${NAME+x}" ] || [ -z "${NAME}" ]; then
-  return
-fi
-if [ "$(hget spaces $SID)" = "true" ]; then
-  sketchybar --set  $NAME     icon.highlight=true                       \
-                              icon.padding_left=5                       \
-                              icon.padding_right=-2                     \
-                              \
-                              label.color=$BAR_ACTIVE_ICON              \
-                              label.width="dynamic"                     \
-                              \
-                              background.border_width=1                 \
-                              background.border_color=$BAR_ACTIVE_ICON  \
-                              drawing=on
-else
-  sketchybar --set  $NAME     icon.highlight=true                       \
-                              icon.padding_left=7                       \
-                              icon.padding_right=-6                     \
-                              \
-                              label.color=$BAR_ACTIVE_ICON              \
-                              label.width="dynamic"                     \
-                              \
-                              background.border_width=1                 \
-                              background.border_color=$BAR_ACTIVE_ICON  \
-                              drawing=on
-fi
-}
-
-deactivate_space() {
-if [ -z "${SID+x}" ] || [ -z "${SID}" ] || [ -z "${NAME+x}" ] || [ -z "${NAME}" ]; then
-  return
-fi
-
-if [ "$(hget spaces $SID)" = "true" ]; then
-  sketchybar --set   $NAME    icon.highlight=false            \
-                              icon.padding_left=5             \
-                              icon.padding_right=-2           \
-                              \
-                              label.color=$BAR_INACTIVE_ICON  \
-                              label.width="dynamic"           \
-                              \
-                              background.border_width=0       \
-                              drawing=on
-else
-  sketchybar --set  $NAME     icon.highlight=false            \
-                              \
-                              label.color=$BAR_INACTIVE_ICON  \
-                              label.width="dynamic"           \
-                              \
-                              background.border_width=0       \
-                              drawing=off
-fi
-}
-
-refresh_current_workspace() {
-  current_space=${2:-$(yabai -m query --spaces --space | jq .index)}
-  args=()
-
-  while read -r line; do
-    for space in $line; do
-      icon_strip=" "
-      apps="$(yabai -m query --windows --space $space | jq -r '.[] | select(.["is-minimized"] == false) | .app')"
-      if [ "$apps" ]; then
-        while IFS= read -r app; do
-          icon_strip+=" $($HOME/.config/sketchybar/plugins/icon_map.sh "$app")"
-        done <<< "$apps"
-        args+=(--set space.$space label="$icon_strip" drawing=on icon.padding_left=5 icon.padding_right=-2)
-        hput spaces "$space" true
-      else
-        args+=(--set space.$space label="$icon_strip" drawing=on icon.padding_left=7 icon.padding_right=-6)
-        hput spaces "$space" false
-      fi
-    done
-  done <<< "$current_space"
-
-  sketchybar -m "${args[@]}"
-}
-
-refresh_workspaces() {
-  current_spaces=${WORKSPACES:-$(yabai -m query --displays | jq -r '.[].spaces | @sh')}
-  current_space=${CURRENT:-$(yabai -m query --spaces --space | jq .index)}
-  args=()
-  if [ "$FORCE_CURRENT" = "true" ]; then
-    current_spaces+=" $current_space"
+update() {
+  # 처음 시작에만 작동하기 위해서
+  # 현재 forced, space_change 이벤트가 동시에 발생하고 있다.
+  if [ "$SENDER" = "space_change" ]; then
+    source "$CONFIG_DIR/colors.sh"
+    COLOR=$BACKGROUND_2
+    if [ "$SELECTED" = "true" ]; then
+      COLOR=$GREY
+    fi
+    # sketchybar --set $NAME icon.highlight=$SELECTED \
+    #                        label.highlight=$SELECTED \
+    #                        background.border_color=$COLOR
+    
+    sketchybar --set space.$(aerospace list-workspaces --focused) icon.highlight=true \
+                      label.highlight=true \
+                      background.border_color=$GREY
   fi
+}
 
-  while read -r line; do
-    for space in $line; do
-      icon_strip=" "
-      apps="$(yabai -m query --windows --space $space | jq -r '.[] | select(.["is-minimized"] == false) | .app')"
-      if [ "$apps" ]; then
-        while IFS= read -r app; do
-          icon_strip+=" $($HOME/.config/sketchybar/plugins/icon_map.sh "$app")"
-        done <<< "$apps"
-        args+=(--set space.$space label="$icon_strip" drawing=on icon.padding_left=5 icon.padding_right=-2)
-        hput spaces "$space" true
-      else
-        if [ "$current_space" = "$space" ]; then
-          args+=(--set space.$space label="$icon_strip" drawing=on icon.padding_left=7 icon.padding_right=-6)
+set_space_label() {
+  sketchybar --set $NAME icon="$@"
+}
+
+mouse_clicked() {
+  if [ "$BUTTON" = "right" ]; then
+    # yabai -m space --destroy $SID
+    echo ''
+  else
+    if [ "$MODIFIER" = "shift" ]; then
+      SPACE_LABEL="$(osascript -e "return (text returned of (display dialog \"Give a name to space $NAME:\" default answer \"\" with icon note buttons {\"Cancel\", \"Continue\"} default button \"Continue\"))")"
+      if [ $? -eq 0 ]; then
+        if [ "$SPACE_LABEL" = "" ]; then
+          set_space_label "${NAME:6}"
         else
-          args+=(--set space.$space label="$icon_strip" drawing=off icon.padding_left=7 icon.padding_right=-6)
+          set_space_label "${NAME:6} ($SPACE_LABEL)"
         fi
-        hput spaces "$space" false
       fi
-    done
-  done <<< "$current_spaces"
-
-  sketchybar -m "${args[@]}"
+    else
+      #yabai -m space --focus $SID 2>/dev/null
+      aerospace workspace ${NAME#*.}
+    fi
+  fi
 }
 
 case "$SENDER" in
-  "refresh_current_workspace") refresh_current_workspace
-    exit 0;
+  "mouse.clicked") mouse_clicked
   ;;
-  "refresh_workspaces") refresh_workspaces
-    exit 0;
+  *) update
   ;;
 esac
-
-if [ "$SELECTED" = "true" ]; then
-  activate_space
-else
-  deactivate_space
-fi

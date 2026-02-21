@@ -1,12 +1,16 @@
-sketchybar --add  item      battery right                                          \
-           --set  battery   icon.padding_right=$DATA_ICON_PADDING_RIGHT            \
-                            icon.padding_left=$DATA_ICON_PADDING_LEFT              \
-                            icon.color=$BAR_PINK                                   \
-                            \
-                            label.color=$BAR_PINK                                  \
-                            label.padding_right=$DATA_LABEL_PADDING_RIGHT          \
-                            \
-                            background.padding_left=$DATA_BACKGROUND_PADDING_LEFT  \
-                            \
-                            script="$PLUGIN_DIR/battery.sh"                        \
-                            update_freq=3
+#!/bin/sh
+
+battery=(
+  script="$PLUGIN_DIR/battery.sh"
+  icon.font="$FONT:Regular:19.0"
+  padding_right=3
+  padding_left=0
+  label.drawing=off
+  update_freq=120
+  updates=on
+)
+sketchybar --add item battery right \
+           --set battery "${battery[@]}"\
+              icon.font.size=15 update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+           --subscribe battery power_source_change system_woke
+

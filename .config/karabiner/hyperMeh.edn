@@ -1,0 +1,10 @@
+    {:des "Right Command Key -> Hyper Key"
+     :rules [
+        [:right_command :!CTOleft_shift]
+     ]
+    }
+    {:des "Right Option Key -> Meh Key"
+     :rules [
+        [:right_option :!TOleft_shift]
+     ]
+    }

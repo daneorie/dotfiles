@@ -2,7 +2,13 @@ local M = {}
 
 function M.setup()
 	require("oil").setup({
-		default_file_explorer = false,
+		default_file_explorer = true,
+		columns = {
+			"icon",
+			--"permissions",
+			--"size",
+			--"mtime",
+		},
 		keymaps = {
 			["g?"] = "actions.show_help",
 			["<CR>"] = "actions.select",
@@ -19,6 +25,9 @@ function M.setup()
 			["g."] = "actions.toggle_hidden",
 		},
 		use_default_keymaps = false,
+		view_options = {
+			show_hidden = true,
+		},
 	})
 end
 

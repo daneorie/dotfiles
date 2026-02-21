@@ -7,6 +7,10 @@ alt - n : yabai -m window --focus "$(yabai -m query --windows --space | jq -re '
 alt - e : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "south" end) | max')"
 alt - i : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "north" end) | max')"
 alt - o : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "east" end) | max')"
+#alt - n : aerospace focus left
+#alt - e : aerospace focus down
+#alt - i : aerospace focus up
+#alt - o : aerospace focus right
 
 # swap managed window
 shift + alt - n : yabai -m window --swap west
@@ -25,6 +29,10 @@ ctrl + alt + cmd - n : yabai -m window --stack west
 ctrl + alt + cmd - e : yabai -m window --stack south
 ctrl + alt + cmd - i : yabai -m window --stack north
 ctrl + alt + cmd - o : yabai -m window --stack east
+#ctrl + alt + cmd - n : aerospace join-with left
+#ctrl + alt + cmd - e : aerospace join-with down
+#ctrl + alt + cmd - i : aerospace join-with up
+#ctrl + alt + cmd - o : aerospace join-with right
 
 # rotate tree
 alt - r : yabai -m space --rotate 90
@@ -46,6 +54,11 @@ alt - h : yabai -m window --toggle split
 
 # balance size of windows
 shift + ctrl + alt - 0 : yabai -m space --balance
+#shift + ctrl + alt - 0 : aerospace balance-sizes
+
+# "swipe" workspaces
+#alt - tab: aerospace workspace $(( $(cat ~/.aerospace.fw) % $(cat $~/.aerospace.nw) + 1 ))
+#shift + alt - tab: aerospace workspace $(( ($(cat ~/.aerospace.fw) + 1) % $(cat ~/.aerospace.nw) + 1 ))
 
 # Arrow Keys - hjkl -> neio
 fn - n : skhd -k "left"
@@ -68,6 +81,16 @@ shift + alt - 7 : yabai -m window --space 7; yabai -m space --focus 7
 shift + alt - 8 : yabai -m window --space 8; yabai -m space --focus 8
 shift + alt - 9 : yabai -m window --space 9; yabai -m space --focus 9
 shift + alt - 0 : yabai -m window --space 10; yabai -m space --focus 10
+#shift + alt - 1 : aerospace move-node-to-workspace 1; aerospace workspace 1
+#shift + alt - 2 : aerospace move-node-to-workspace 2; aerospace workspace 2
+#shift + alt - 3 : aerospace move-node-to-workspace 3; aerospace workspace 3
+#shift + alt - 4 : aerospace move-node-to-workspace 4; aerospace workspace 4
+#shift + alt - 5 : aerospace move-node-to-workspace 5; aerospace workspace 5
+#shift + alt - 6 : aerospace move-node-to-workspace 6; aerospace workspace 6
+#shift + alt - 7 : aerospace move-node-to-workspace 7; aerospace workspace 7
+#shift + alt - 8 : aerospace move-node-to-workspace 8; aerospace workspace 8
+#shift + alt - 9 : aerospace move-node-to-workspace 9; aerospace workspace 9
+#shift + alt - 0 : aerospace move-node-to-workspace 10; aerospace workspace 10
 
 # create desktop, move window and follow focus - uses jq for parsing json (brew install jq)
 shift + alt - c : yabai -m space --create && \

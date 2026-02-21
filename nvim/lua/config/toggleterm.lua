@@ -23,7 +23,7 @@ function M.setup()
 
 	toggleterm.setup({
 		size = 20,
-		open_mapping = [[<c-\>]],
+		open_mapping = { [[<c-`>]], [[<c-\>]] },
 		hide_numbers = true,
 		shade_terminals = true,
 		shading_factor = 2,

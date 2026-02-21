@@ -25,6 +25,18 @@ if [[ -e "~/.keys" ]]; then
 	. ~/.keys
 fi
 
+# C1 vars and functions
+export BA=BACoolTeam
+export ASV=ASVCOOLTEAM
+export AWS_DEV=0123456789
+export AWS_QA=9876543210
+export AWS_PROFILE_DEV=GR_GG_COF_AWS_${AWS_DEV}_Developer
+export AWS_PROFILE_QA=GR_GG_COF_AWS_${AWS_QA}_Developer
+export AWS_PROFILE=${AWS_PROFILE_DEV}
+function awsCredentials {
+	cloudsentry access get --account ${1:-$AWS_PROFILE} --ba ${2:-$BA}
+}
+
 # When typing '#' in normal/vicmd mode, append a '#' at the beginning of the line and return.
 # This stops the current line from running but keeps it in the history.
 setopt interactivecomments
@@ -38,7 +50,6 @@ bindkey -M vicmd '^v' edit-command-line
 
 export PAGER=nvimpager
 export LESSKEY=~/.lesskey
-export FZF_DEFAULT_OPTS='--bind=ctrl-e:down,ctrl-u:down,ctrl-y:up'
 alias l='ls -lH'
 alias la='ls -a'
 alias ll='l'
@@ -66,6 +77,14 @@ c() {
 # git aliases
 alias g='git'
 alias gu='gitui'
+alias ga='git aliases'
+alias refreshGithub='ssh -T git@github.com'
+function gc {
+	git clone git@github.com:ORG/backend.git "$1" && cd "$1" && git checkout "$1"
+}
+function mergeMain {
+	cd ../main && git pull && git merge main && npm run install:all
+}
 
 # yabai aliases
 alias yaq='yabai -m query'
@@ -82,7 +101,37 @@ alias yqww='yqw --window'
 alias yqws='yqw --space'
 alias yqwd='yqw --display'
 
-alias testGithub='ssh -T git@github.com'
+function reverseOrder {
+	grep -n "" | sort -rn | sed 's/^[0-9]*://'
+}
+
+function readresponse {
+	gunzip -c | jq
+}
+
+function readbody {
+	read body
+	if [[ -n "$body" ]]; then
+		echo "$body" | base64 --decode | gunzip -c | jq
+	else
+		echo "$1" | base64 --decode | gunzip -c | jq
+	fi
+}
+
+function urldecode {
+	read url
+	if [[ -n "$url" ]]; then
+		echo "$url" | echo -e "$(sed 's/+/ /g;s/%\(..\)/\\x\1/g;')"
+	else
+		echo "$1" | echo -e "$(sed 's/+/ /g;s/%\(..\)/\\x\1/g;')"
+	fi
+}
+
+function rmpwd {
+	dir="$(pwd)"
+	cd ..
+	rm -rf "$dir"
+}
 
 export KEYTIMEOUT=1 # this lowers the time it takes to switch from viins to vicmd and vice versa
 eval "$(jenv init -)"
@@ -172,7 +221,29 @@ set-prompt() {
 	fi
 }
 
+# ---- FZF ----
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+	
+export FZF_DEFAULT_OPTS='--bind=ctrl-e:down,ctrl-u:down,ctrl-y:up'
+
+# -- Use fd instead of fzf --
+
+export FZF_DEFAULT_COMMAND="fd --hidden --strip-cwd-prefix --exclude .git"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND="fd --type=d --hidden --strip-cwd-prefix --exclude .git"
+
+# Use fd for listing path candidates. The first argument to the function ($1) is the base path to start traversal
+_fzf_compgen_path() {
+	/usr/local/bin/fd --hidden --exclude .git . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+	/usr/local/bin/fd --type=d --hidden --exclude .git . "$1"
+}
+
+[ -f ~/fzf-git.sh/fzf-git.sh ] && source ~/fzf-git.sh/fzf-git.sh
 
 # Path to custom completions
 fpath=($HOME/dotfiles/shell/completions/ $fpath)

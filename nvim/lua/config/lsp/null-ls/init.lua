@@ -3,11 +3,11 @@ local M = {}
 local nls = require("null-ls")
 local nls_utils = require("null-ls.utils")
 local b = nls.builtins
-local with_diagnostics_code = function(builtin)
-	return builtin.with({
-		diagnostics_format = "#{m} [#{c}]",
-	})
-end
+--local with_diagnostics_code = function(builtin)
+--	return builtin.with({
+--		diagnostics_format = "#{m} [#{c}]",
+--	})
+--end
 --local refurb = require "config.lsp.null-ls.diagnostics.refurb"
 
 --local with_root_file = function(builtin, file)
@@ -35,12 +35,12 @@ local sources = {
 	b.diagnostics.eslint_d,
 	--b.diagnostics.markdownlint,
 	--b.diagnostics.flake8.with { extra_args = { "--max-line-length=180" } },
-	b.diagnostics.ruff.with({ extra_args = { "--max-line-length=180" } }),
+	--b.diagnostics.ruff.with({ extra_args = { "--max-line-length=180" } }),
 	b.diagnostics.tsc,
 	--b.diagnostics.selene,
 	--b.diagnostics.codespell,
 	--with_root_file(b.diagnostics.selene, "selene.toml"),
-	with_diagnostics_code(b.diagnostics.shellcheck),
+	--with_diagnostics_code(b.diagnostics.shellcheck),
 	b.diagnostics.zsh,
 	--refurb,
 	--b.diagnostics.cspell.with {

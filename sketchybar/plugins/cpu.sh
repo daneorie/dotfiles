@@ -1,22 +1,10 @@
-source "$HOME/.config/sketchybar/colors.sh"
+#!/bin/bash
 
-add_hover() {
-    sketchybar --animate linear 10 --set $NAME background.border_color=$BAR_ORANGE
-}
+CORE_COUNT=$(sysctl -n machdep.cpu.thread_count)
+CPU_INFO=$(ps -eo pcpu,user)
+CPU_SYS=$(echo "$CPU_INFO" | grep -v $(whoami) | sed "s/[^ 0-9\.]//g" | awk "{sum+=\$1} END {print sum/(100.0 * $CORE_COUNT)}")
+CPU_USER=$(echo "$CPU_INFO" | grep $(whoami) | sed "s/[^ 0-9\.]//g" | awk "{sum+=\$1} END {print sum/(100.0 * $CORE_COUNT)}")
 
-remove_hover() {
-    sketchybar --animate linear 10 --set $NAME background.border_color=$BAR_BACKGROUND
-}
+CPU_PERCENT="$(echo "$CPU_SYS $CPU_USER" | awk '{printf "%.0f\n", ($1 + $2)*100}')"
 
-mouse_clicked() {
-    open -a alacritty --args -e btop
-}
-
-case "$SENDER" in
-  "mouse.clicked") mouse_clicked
-  ;;
-  "mouse.entered") add_hover
-  ;;
-  "mouse.exited") remove_hover
-  ;;
-esac
+sketchybar --set $NAME label="$CPU_PERCENT%"

@@ -1,4 +1,4 @@
-#!/usr/bin/env /usr/local/Cellar/python@3.11/3.11.8/Frameworks/Python.framework/Versions/3.11/bin/python3.11
+#!/usr/bin/env /usr/local/Cellar/python@3.11/3.11.9_1/Frameworks/Python.framework/Versions/3.11/bin/python3.11
 #ref: https://gist.github.com/pudquick/eebc4d569100c8e3039bf3eae56bee4c
 
 from Foundation import NSBundle

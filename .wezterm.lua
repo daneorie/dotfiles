@@ -16,6 +16,7 @@ config.window_background_opacity = 0.6
 config.text_background_opacity = 0.6
 config.macos_window_background_blur = 40
 config.enable_kitty_keyboard = true
+--config.enable_kitty_graphics = true
 config.tab_bar_at_bottom = true
 config.window_decorations = "RESIZE"
 config.use_fancy_tab_bar = false
@@ -23,6 +24,8 @@ config.use_fancy_tab_bar = false
 local bare_repos = {
 	"mtgt",
 	"advent-of-code-2023",
+	"broski_orie",
+	"autoscan",
 }
 
 -- if you are *NOT* lazy-loading smart-splits.nvim (recommended)
@@ -276,6 +279,7 @@ config.keys = {
 				{ id = home .. "/dotfiles||dotfiles", label = home .. "/dotfiles" },
 				{ id = home .. "/wiki||wiki", label = home .. "/wiki" },
 				{ id = home .. "/repos||repos", label = home .. "/repos" },
+				{ id = home .. "/.local/share/nvim/lazy||lazy", label = home .. "/.local/share/nvim/lazy" },
 			}
 
 			-- Add all GitHub repos except the bare repos (worktrees)

@@ -42,6 +42,8 @@ ln -s ~/dotfiles/yazi/ ~/.config/
 ln -s ~/dotfiles/ubersicht/widgets/ ~/Library/Application\ Support/Übersicht/
 ln -s ~/dotfiles/sketchybar ~/.config/
 ln -s ~/dotfiles/hammerspoon ~/.hammerspoon
+ln -s ~/dotfiles/aerospace ~/.config/
+
 
 # scripts
 ln -s ~/dotfiles/scripts/tmux-sessionizer ~/.local/bin/

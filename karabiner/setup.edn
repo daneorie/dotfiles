@@ -47,6 +47,12 @@
     ]
 } ;; applications
 
+:input-sources {
+    :ja {:language "ja"}
+    :en {:language "en"}
+}
+
+
 :templates {
     :open "open -a '%s'"                                ;; :open "Safari"
     :openApp "open \"%s\""                              ;; :open "/Applications/Safari.app"

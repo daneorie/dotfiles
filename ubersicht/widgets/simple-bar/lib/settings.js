@@ -373,15 +373,15 @@ export const defaultSettings = {
   global: {
     theme: "auto",
     floatingBar: false,
-    noBarBg: false,
-    noColorInData: false,
+    noBarBg: true,
+    noColorInData: true,
     bottomBar: false,
     inlineSpacesOptions: false,
     disableNotifications: false,
     compactMode: true,
     widgetMaxWidth: "160px",
-    spacesBackgroundColorAsForeground: false,
-    widgetsBackgroundColorAsForeground: false,
+    spacesBackgroundColorAsForeground: true,
+    widgetsBackgroundColorAsForeground: true,
     font: "JetBrains Mono",
     fontSize: "11px",
     yabaiPath: "/usr/local/bin/yabai",
@@ -391,7 +391,7 @@ export const defaultSettings = {
   },
   themes: {
     lightTheme: "NightShiftLight",
-    darkTheme: "NightShiftDark",
+    darkTheme: "OneDark",
   },
   process: {
     displayOnlyCurrent: false,
@@ -413,24 +413,24 @@ export const defaultSettings = {
   },
   widgets: {
     notificationWidget: true,
-    processWidget: true,
+    processWidget: false,
     weatherWidget: false,
-    batteryWidget: true,
-    wifiWidget: true,
+    batteryWidget: false,
+    wifiWidget: false,
     vpnWidget: false,
-    zoomWidget: false,
-    soundWidget: true,
-    micWidget: true,
+    zoomWidget: true,
+    soundWidget: false,
+    micWidget: false,
     dateWidget: true,
     timeWidget: true,
     keyboardWidget: false,
-    spotifyWidget: true,
+    spotifyWidget: false,
     cryptoWidget: false,
     stockWidget: false,
     musicWidget: true,
     mpdWidget: false,
     dndWidget: false,
-    browserTrackWidget: true,
+    browserTrackWidget: false,
   },
   notificationWidgetOptions: {
     discordOption: false,
@@ -576,7 +576,7 @@ export const get = () => {
 export const set = async (newSettings) =>
   window.localStorage.setItem(
     SETTINGS_STORAGE_KEY,
-    JSON.stringify(newSettings)
+    JSON.stringify(newSettings),
   );
 
 export const getRefreshFrequency = (value, defaultValue) => {
