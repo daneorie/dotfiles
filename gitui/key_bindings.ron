@@ -52,6 +52,6 @@
 
 	abort_merge: Some(( code: Char('M'), modifiers: "SHIFT")),
 
-	exit_popup: Some(( code: Char('q'), modifiers: "CONTROL" )),
-	quit: Some(( code: Esc, modifiers: "")),
+	exit_popup: Some(( code: Esc, modifiers: "" )),
+	quit: Some(( code: Char('q'), modifiers: "")),
 )
