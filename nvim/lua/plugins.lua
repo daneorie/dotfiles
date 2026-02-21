@@ -134,21 +134,21 @@ require("lazy").setup({
 	-- Treesitter
 	{
 		"nvim-treesitter/nvim-treesitter",
+		priority = 1000, -- High priority to ensure it loads before markview
 		build = ":TSUpdate",
 		config = function()
 			require("config.treesitter").setup()
-			--local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-			--parser_config.http = {
-			--	install_info = {
-			--		url = "~/repos/tree-sitter-http", -- local path or git repo
-			--		files = { "src/parser.c" }, -- note that some parsers also require src/scanner.c or src/scanner.cc
-			--		-- optional entries:
-			--		branch = "main", -- default branch in case of git repo if different from master
-			--		generate_requires_npm = false, -- if stand-alone parser without npm dependencies
-			--		requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
-			--	},
-			--	filetype = "http", -- if filetype does not match the parser name
-			--}
+			local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+			parser_config.http = {
+				install_info = {
+					url = "https://github.com/mistweaverco/tree-sitter-kulala",
+					files = { "src/parser.c" },
+					branch = "main",
+					generate_requires_npm = false,
+					requires_generate_from_grammar = false,
+				},
+				filetype = "http",
+			}
 		end,
 		dependencies = {
 			{ "nvim-treesitter/nvim-treesitter-textobjects", event = "BufReadPre" },
@@ -396,29 +396,31 @@ require("lazy").setup({
 		config = true,
 	},
 	{
-		"rest-nvim/rest.nvim",
-		dependencies = { "luarocks.nvim" },
-		ft = { "http", "https" },
+		"mistweaverco/kulala.nvim",
+		ft = { "http" },
 		keys = {
 			{
 				"<localleader>rr",
-				"<cmd>Rest run<cr>",
+				"<cmd>lua require('kulala').run()<cr>",
 				desc = "Run request under the cursor",
 			},
 			{
 				"<localleader>rl",
-				"<cmd>Rest run last<cr>",
-				desc = "Re-run latest request",
+				"<cmd>lua require('kulala').run_all()<cr>",
+				desc = "Run all requests",
 			},
 		},
 		config = function()
-			require("rest-nvim").setup({
-				result = {
-					keybinds = {
-						buffer_local = false,
-						prev = "N",
-						next = "O",
-					},
+			require("kulala").setup({
+				-- Request display options
+				display = {
+					border = "rounded",
+					title = "Kulala",
+				},
+				-- Response window options
+				response = {
+					max_width = 120,
+					max_height = 40,
 				},
 			})
 		end,
@@ -538,10 +540,20 @@ require("lazy").setup({
 	{
 		"OXY2DEV/markview.nvim",
 		lazy = false,
+		priority = 500, -- Lower priority than treesitter to ensure proper load order
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",
 			"nvim-tree/nvim-web-devicons",
 		},
+		config = function()
+			-- Wait for treesitter to be fully loaded
+			require("nvim-treesitter")
+			
+			-- Optional: Configure markview if needed
+			-- require("markview").setup({
+			--     -- your config here
+			-- })
+		end,
 	},
 	{
 		"iamcco/markdown-preview.nvim",
@@ -627,3 +639,6 @@ require("lazy").setup({
 		end,
 	},
 })
+
+-- Load options after lazy.nvim is set up
+require("config.options").setup()

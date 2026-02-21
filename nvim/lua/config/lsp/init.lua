@@ -2,6 +2,27 @@ local M = {}
 
 -- local util = require "lspconfig.util"
 
+-- Set up custom LSP server configurations
+local lspconfig = require("lspconfig")
+local configs = require("lspconfig.configs")
+
+-- Custom kulala-ls configuration
+if not configs.kulala_ls then
+	configs.kulala_ls = {
+		default_config = {
+			cmd = { "kulala-ls", "--stdio" },
+			filetypes = { "http" },
+			root_dir = function(fname)
+				return lspconfig.util.find_git_ancestor(fname) or vim.fn.getcwd()
+			end,
+			single_file_support = true,
+		},
+		docs = {
+			description = "Language server for HTTP files using kulala syntax",
+		},
+	}
+end
+
 local servers = {
 	gopls = {
 		settings = {
@@ -128,6 +149,9 @@ local servers = {
 	-- emmet_ls = {},
 	-- marksman = {},
 	-- angularls = {},
+	kulala_ls = {
+		filetypes = { "http" },
+	},
 	-- sqls = {
 	-- settings = {
 	--   sqls = {

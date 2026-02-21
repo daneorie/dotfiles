@@ -28,6 +28,16 @@ local sources = {
 	b.formatting.isort,
 	b.formatting.stylua,
 	b.formatting.google_java_format,
+	-- HTTP file formatting
+	{
+		method = nls.methods.FORMATTING,
+		filetypes = { "http" },
+		generator = require("null-ls.helpers").formatter_factory({
+			command = "kulala-fmt",
+			args = { "format", "--stdin" },
+			to_stdin = true,
+		}),
+	},
 	--with_root_file(b.formatting.stylua, "stylua.toml"),
 
 	-- diagnostics

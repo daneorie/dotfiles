@@ -1,3 +1,5 @@
+local M = {}
+
 local options = {
 	backup = false,                            -- creates a backup file
 	clipboard = "unnamedplus",                 -- allows neovim to access the system clipboard
@@ -41,20 +43,27 @@ local options = {
 	writebackup = false,                       -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
 }
 
-for k, v in pairs(options) do
-	vim.opt[k] = v
+function M.setup()
+	-- Safely set options with error handling
+	for k, v in pairs(options) do
+		local ok, err = pcall(function()
+			vim.opt[k] = v
+		end)
+		if not ok then
+			-- Skip options that can't be set (e.g., during plugin installation)
+			-- You can uncomment the line below for debugging if needed
+			-- vim.notify("Failed to set option " .. k .. ": " .. tostring(err), vim.log.levels.DEBUG)
+		end
+	end
+
+	-- Additional option settings with protection
+	pcall(function()
+		vim.opt.shortmess:append("c")
+	end)
+
+	pcall(function()
+		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	end)
 end
 
-vim.opt.shortmess:append("c")
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-
---vim.cmd([[
---	hi Normal guibg=none ctermbg=none
---	hi LineNr guibg=none ctermbg=none
---	hi Folded guibg=none ctermbg=none
---	hi NonText guibg=none ctermbg=none
---	hi SpecialKey guibg=none ctermbg=none
---	hi VertSplit guibg=none ctermbg=none
---	hi SignColumn guibg=none ctermbg=none
---	hi EndOfBuffer guibg=none ctermbg=none
---]])
+return M
