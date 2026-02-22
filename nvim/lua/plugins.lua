@@ -177,7 +177,7 @@ require("lazy").setup({
 			"LinArcX/telescope-env.nvim",
 			"daneorie/telescope-insert-path.nvim",
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-			{ "LukasPietzschmann/telescope-tabs", config = true },
+			{ "LukasPietzschmann/telescope-tabs",         config = true },
 			{
 				"nvim-telescope/telescope-ui-select.nvim",
 				config = function()
@@ -397,17 +397,25 @@ require("lazy").setup({
 	},
 	{
 		"mistweaverco/kulala.nvim",
-		ft = { "http" },
+		ft = { "http", "rest" },
 		keys = {
 			{
 				"<localleader>rr",
 				"<cmd>lua require('kulala').run()<cr>",
 				desc = "Run request under the cursor",
+				ft = { "http", "rest" },
 			},
 			{
 				"<localleader>rl",
 				"<cmd>lua require('kulala').run_all()<cr>",
 				desc = "Run all requests",
+				ft = { "http", "rest" },
+			},
+			{
+				"<localleader>re",
+				"<cmd>lua require('kulala').set_selected_env()<cr>",
+				desc = "Run all requests",
+				ft = { "http", "rest" },
 			},
 		},
 		config = function()
@@ -422,6 +430,30 @@ require("lazy").setup({
 					max_width = 120,
 					max_height = 40,
 				},
+			})
+
+			-- Set up keybindings for kulala response buffers
+			-- Hook into kulala's response buffer creation
+			vim.api.nvim_create_autocmd("BufWinEnter", {
+				pattern = "*",
+				callback = function()
+					local bufname = vim.api.nvim_buf_get_name(0)
+					-- Check if this is a kulala response buffer (buffer name contains 'kulala://' and has kulala_ui filetype)
+					if bufname:match("kulala://") or vim.bo.filetype:match("%.kulala_ui$") then
+						local opts = { noremap = true, silent = true, buffer = true }
+						vim.keymap.set("n", "(", function()
+							-- Use the UI module directly to show previous response
+							local ui = require("kulala.ui")
+							ui.show_previous()
+						end, vim.tbl_extend("force", opts, { desc = "Previous HTTP response" }))
+
+						vim.keymap.set("n", ")", function()
+							-- Use the UI module directly to show next response
+							local ui = require("kulala.ui")
+							ui.show_next()
+						end, vim.tbl_extend("force", opts, { desc = "Next HTTP response" }))
+					end
+				end,
 			})
 		end,
 	},
@@ -548,7 +580,7 @@ require("lazy").setup({
 		config = function()
 			-- Wait for treesitter to be fully loaded
 			require("nvim-treesitter")
-			
+
 			-- Optional: Configure markview if needed
 			-- require("markview").setup({
 			--     -- your config here

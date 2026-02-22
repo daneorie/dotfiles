@@ -22,3 +22,15 @@ Content-Type: application/json
 
 GET {{baseUrl}}/users/{{userId}}
 Accept: application/json
+
+###
+
+POST {{API_URL}}
+x-api-key: {{API_KEY}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "amplitudeID": "123"
+}
+
