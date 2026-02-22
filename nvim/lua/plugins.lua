@@ -128,9 +128,22 @@ require("lazy").setup({
 	-- Treesitter
 	{
 		"nvim-treesitter/nvim-treesitter",
+		priority = 1000, -- High priority to ensure it loads before markview
 		build = ":TSUpdate",
 		config = function()
 			require("config.treesitter").setup()
+			local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+			parser_config.http = {
+				install_info = {
+					url = "https://github.com/mistweaverco/tree-sitter-kulala",
+					files = { "src/parser.c" },
+					branch = "main",
+					generate_requires_npm = false,
+					requires_generate_from_grammar = false,
+				},
+				filetype = { "http", "rest" },
+				--filetype = "http",
+			}
 		end,
 		dependencies = {
 			{ "nvim-treesitter/nvim-treesitter-textobjects", event = "BufReadPre" },
@@ -255,7 +268,8 @@ require("lazy").setup({
 			"folke/neodev.nvim",
 			"b0o/schemastore.nvim",
 			"jose-elias-alvarez/typescript.nvim",
-			"jose-elias-alvarez/null-ls.nvim", -- for formatters and linters
+			--"jose-elias-alvarez/null-ls.nvim", -- for formatters and linters
+			"nvimtools/none-ls.nvim",
 			"lvimuser/lsp-inlayhints.nvim",
 			"ray-x/lsp_signature.nvim",
 			"pierreglaser/folding-nvim",
@@ -275,7 +289,7 @@ require("lazy").setup({
 			{
 				"SmiteshP/nvim-navic",
 				config = function()
-					require("nvim-navic").setup()
+					require("nvim-navic").setup({})
 				end,
 			},
 			{
@@ -285,6 +299,26 @@ require("lazy").setup({
 				end,
 			},
 		},
+	},
+
+	-- Formatter
+	{
+		"stevearc/conform.nvim",
+		config = function()
+			require("conform").setup({
+				formatters = {
+					kulala = {
+						command = "kulala-fmt",
+						args = { "format", "$FILENAME" },
+						stdin = false,
+					},
+				},
+				formatters_by_ft = {
+					http = { "kulala" },
+				},
+				format_on_save = true,
+			})
+		end,
 	},
 
 	-- Terminal
@@ -359,45 +393,78 @@ require("lazy").setup({
 
 	-- REST
 	{
-		"rest-nvim/rest.nvim",
-		dependencies = { "nvim-lua/plenary.nvim" },
+		"mistweaverco/kulala.nvim",
+		keys = {
+			{ "<leader>Rs", desc = "Send request" },
+			{ "<leader>Ra", desc = "Send all requests" },
+			{ "<leader>Rb", desc = "Open scratchpad" },
+		},
+		ft = { "http", "rest" },
+		opts = {
+			global_keymaps = false,
+			global_keymaps_prefix = "<leader>R",
+			kulala_keymaps_prefix = "",
+		},
+	},
+	{
+		"mistweaverco/kulala.nvim",
+		ft = { "http", "rest" },
+		keys = {
+			{
+				"<localleader>rr",
+				"<cmd>lua require('kulala').run()<cr>",
+				desc = "Run request under the cursor",
+				ft = { "http", "rest" },
+			},
+			{
+				"<localleader>rl",
+				"<cmd>lua require('kulala').run_all()<cr>",
+				desc = "Run all requests",
+				ft = { "http", "rest" },
+			},
+			{
+				"<localleader>re",
+				"<cmd>lua require('kulala').set_selected_env()<cr>",
+				desc = "Select environment",
+				ft = { "http", "rest" },
+			},
+		},
 		config = function()
-			require("rest-nvim").setup({
-				-- Open request results in a horizontal split
-				result_split_horizontal = false,
-				-- Keep the http file buffer above|left when split horizontal|vertical
-				result_split_in_place = false,
-				-- Skip SSL verification, useful for unknown certificates
-				skip_ssl_verification = true,
-				-- Encode URL before making request
-				encode_url = true,
-				-- Highlight request on run
-				highlight = {
-					enabled = true,
-					timeout = 150,
+			require("kulala").setup({
+				-- Request display options
+				display = {
+					border = "rounded",
+					title = "Kulala",
 				},
-				result = {
-					-- toggle showing URL, HTTP info, headers at top the of result window
-					show_url = true,
-					-- show the generated curl command in case you want to launch
-					-- the same request via the terminal (can be verbose)
-					show_curl_command = false,
-					show_http_info = true,
-					show_headers = true,
-					-- executables or functions for formatting response body [optional]
-					-- set them to false if you want to disable them
-					formatters = {
-						json = "jq",
-						html = function(body)
-							return vim.fn.system({ "tidy", "-i", "-q", "-" }, body)
-						end,
-					},
+				-- Response window options
+				response = {
+					max_width = 120,
+					max_height = 40,
 				},
-				-- Jump to request line on run
-				jump_to_request = false,
-				env_file = ".env",
-				custom_dynamic_variables = {},
-				yank_dry_run = true,
+			})
+
+			-- Set up keybindings for kulala response buffers
+			-- Hook into kulala's response buffer creation
+			vim.api.nvim_create_autocmd("BufWinEnter", {
+				pattern = "*",
+				callback = function()
+					local bufname = vim.api.nvim_buf_get_name(0)
+					-- Check if this is a kulala response buffer (buffer name contains 'kulala://' and has kulala_ui filetype)
+					if bufname:match("kulala://") or vim.bo.filetype:match("%.kulala_ui$") then
+						local opts = { noremap = true, silent = true, buffer = true }
+						vim.keymap.set("n", "(", function()
+							-- Use the UI module directly to show previous response
+							local ui = require("kulala.ui")
+							ui.show_previous()
+						end, vim.tbl_extend("force", opts, { desc = "Previous HTTP response" }))
+
+						vim.keymap.set("n", ")", function()
+							-- Use the UI module directly to show next response
+							local ui = require("kulala.ui")
+							ui.show_next()
+						end, vim.tbl_extend("force", opts, { desc = "Next HTTP response" }))
+					end
+				end,
 			})
 		end,
 	},
@@ -516,6 +583,20 @@ require("lazy").setup({
 	{
 		"OXY2DEV/markview.nvim",
 		lazy = false,
+		priority = 500, -- Lower priority than treesitter to ensure proper load order
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-tree/nvim-web-devicons",
+		},
+		config = function()
+			-- Wait for treesitter to be fully loaded
+			require("nvim-treesitter")
+
+			-- Optional: Configure markview if needed
+			-- require("markview").setup({
+			--     -- your config here
+			-- })
+		end,
 	},
 	{
 		"iamcco/markdown-preview.nvim",
@@ -630,3 +711,6 @@ require("lazy").setup({
 		enabled = false,
 	},
 })
+
+-- Load options after lazy.nvim is set up
+require("config.options").setup()

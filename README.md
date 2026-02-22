@@ -284,3 +284,11 @@ npm run build-plugin
 -- Markdown
 
 - [markdown-preview.nvim](https://github.com/iamcco/markdown-preview.nvim)
+
+
+## LSP Servers
+npm install -g @mistweaverco/kulala-ls
+
+
+## Formatters
+npm install -g @mistweaverco/kulala-fmt

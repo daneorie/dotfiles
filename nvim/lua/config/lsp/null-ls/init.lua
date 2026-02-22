@@ -3,11 +3,11 @@ local M = {}
 local nls = require("null-ls")
 local nls_utils = require("null-ls.utils")
 local b = nls.builtins
-local with_diagnostics_code = function(builtin)
-	return builtin.with({
-		diagnostics_format = "#{m} [#{c}]",
-	})
-end
+--local with_diagnostics_code = function(builtin)
+--	return builtin.with({
+--		diagnostics_format = "#{m} [#{c}]",
+--	})
+--end
 --local refurb = require "config.lsp.null-ls.diagnostics.refurb"
 
 --local with_root_file = function(builtin, file)
@@ -17,17 +17,6 @@ end
 --		end,
 --	}
 --end
-
-local eslint_config = {
-	condition = function (utils)
-		utils.root_has_file({
-			"eslint.config.js",
-			".eslintrc",
-			".eslintrc.js",
-			".eslintrc.json",
-		})
-	end
-}
 
 local sources = {
 	-- formatting
@@ -39,19 +28,29 @@ local sources = {
 	b.formatting.isort,
 	b.formatting.stylua,
 	b.formatting.google_java_format,
+	-- HTTP file formatting
+	{
+		method = nls.methods.FORMATTING,
+		filetypes = { "http" },
+		generator = require("null-ls.helpers").formatter_factory({
+			command = "kulala-fmt",
+			args = { "format", "--stdin" },
+			to_stdin = true,
+		}),
+	},
 	--with_root_file(b.formatting.stylua, "stylua.toml"),
 
 	-- diagnostics
 	--b.diagnostics.write_good,
-	b.diagnostics.eslint_d.with(eslint_config),
+	b.diagnostics.eslint_d,
 	--b.diagnostics.markdownlint,
 	--b.diagnostics.flake8.with { extra_args = { "--max-line-length=180" } },
-	b.diagnostics.ruff.with({ extra_args = { "--max-line-length=180" } }),
+	--b.diagnostics.ruff.with({ extra_args = { "--max-line-length=180" } }),
 	b.diagnostics.tsc,
 	--b.diagnostics.selene,
 	--b.diagnostics.codespell,
 	--with_root_file(b.diagnostics.selene, "selene.toml"),
-	with_diagnostics_code(b.diagnostics.shellcheck),
+	--with_diagnostics_code(b.diagnostics.shellcheck),
 	b.diagnostics.zsh,
 	--refurb,
 	--b.diagnostics.cspell.with {
@@ -63,7 +62,7 @@ local sources = {
 	b.code_actions.gitsigns.with({
 		disabled_filetypes = { "NeogitCommitMessage" },
 	}),
-	b.code_actions.eslint_d.with(eslint_config),
+	b.code_actions.eslint_d,
 	b.code_actions.gitrebase,
 	b.code_actions.refactoring,
 	b.code_actions.proselint,

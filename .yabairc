@@ -133,5 +133,6 @@ yabai -m rule --add manage=off label="off:Homerow|General" app="^Homerow$" title
 yabai -m rule --add manage=off label="off:Homerow|Exceptions" app="^Homerow$" title="^Exceptions$"
 yabai -m rule --add manage=off label="off:Reminders|Settings" app="^Reminders$" title="^Settings$"
 yabai -m rule --add manage=off label="off:Bartender 5|Bartender 5" app="^Bartender 5$" title="^Bartender 5$"
+yabai -m rule --add manage=off label="off:Finder|Copy" app="^Finder$" title="^Copy$"
 
 echo "yabai configuration loaded..."

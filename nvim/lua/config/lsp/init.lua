@@ -1,6 +1,25 @@
 local M = {}
 
--- local util = require "lspconfig.util"
+-- Set up custom LSP server configurations
+local lspconfig = require("lspconfig")
+local configs = require("lspconfig.configs")
+
+-- Custom kulala-ls configuration
+if not configs.kulala_ls then
+	configs.kulala_ls = {
+		default_config = {
+			cmd = { "kulala-ls", "--stdio" },
+			filetypes = { "http", "rest" },
+			root_dir = function(fname)
+				return lspconfig.util.find_git_ancestor(fname) or vim.fn.getcwd()
+			end,
+			single_file_support = true,
+		},
+		docs = {
+			description = "Language server for HTTP files using kulala syntax",
+		},
+	}
+end
 
 local servers = {
 	gopls = {
@@ -128,6 +147,9 @@ local servers = {
 	-- emmet_ls = {},
 	-- marksman = {},
 	-- angularls = {},
+	kulala_ls = {
+		filetypes = { "http", "rest" },
+	},
 	-- sqls = {
 	-- settings = {
 	--   sqls = {
@@ -140,6 +162,11 @@ local servers = {
 	--   },
 	-- },
 	-- },
+}
+
+-- External servers (not managed by mason)
+local external_servers = {
+	kulala_ls = {},
 }
 
 function M.on_attach(client, bufnr)
@@ -237,11 +264,34 @@ local opts = {
 require("config.lsp.handlers").setup()
 
 function M.setup()
+	-- Custom LSP configurations for non-mason servers
+	local lspconfig = require('lspconfig')
+	local configs = require('lspconfig.configs')
+	local util = require('lspconfig.util')
+
+	-- Configure kulala-ls (installed via npm)
+	if not configs.kulala_ls then
+		configs.kulala_ls = {
+			default_config = {
+				cmd = { 'kulala-ls', '--stdio' },
+				filetypes = { 'http' },
+				root_dir = util.root_pattern('.git'),
+				single_file_support = true,
+			},
+		}
+	end
+
 	-- null-ls
 	require("config.lsp.null-ls").setup(opts)
 
 	-- Installer
 	require("config.lsp.installer").setup(servers, opts)
+
+	-- Setup external LSPs not managed by mason
+	for server_name, config in pairs(external_servers) do
+		local server_opts = vim.tbl_deep_extend("force", opts, config)
+		lspconfig[server_name].setup(server_opts)
+	end
 
 	-- Inlay hints
 	--require("config.lsp.inlay-hints").setup()

@@ -3,6 +3,30 @@ local wezterm = require("wezterm")
 local session_manager = require("wezterm-session-manager/session-manager")
 local act = wezterm.action
 
+-- Full-stack development tabs configuration
+local fullstack_tabs = {
+	{
+		name = "backend",
+		cwd = "./stacks/backend/api/lambdas/src",
+		command = "v.",
+	},
+	{
+		name = "frontend",
+		cwd = "./web",
+		command = "v.",
+	},
+	{
+		name = "server",
+		cwd = "./web",
+		command = "npm run dev:sandbox",
+	},
+	{
+		name = "opencode",
+		cwd = ".",
+		command = "opencode",
+	},
+}
+
 -- Session Management
 wezterm.on("save_session", function(window)
 	session_manager.save_state(window)
@@ -33,6 +57,7 @@ config.window_decorations = "RESIZE"
 config.use_fancy_tab_bar = false
 
 local bare_repos = {
+	"plan-your-day",
 	"sports-fan365-backend",
 	"sports-fan365-backend/feature",
 	--"sports-fan365-backend-old",
@@ -139,6 +164,78 @@ wezterm.on("toggle-transparency", function(window, pane)
 	window:set_config_overrides(overrides)
 end)
 
+-- Helper function to resolve relative paths
+local function resolve_path(cwd, current_pane)
+	if cwd:sub(1, 1) == "/" then
+		-- Absolute path, return as-is
+		return cwd
+	elseif cwd:sub(1, 2) == "~/" then
+		-- Home directory relative path
+		return wezterm.home_dir .. "/" .. cwd:sub(3)
+	else
+		-- Relative path, combine with current working directory
+		local current_cwd = current_pane:get_current_working_dir()
+		if current_cwd then
+			local current_path = current_cwd.file_path or tostring(current_cwd)
+			-- Remove file:// prefix if present
+			current_path = current_path:gsub("^file://", "")
+			return current_path .. "/" .. cwd
+		else
+			-- Fallback to home directory if current path unavailable
+			return wezterm.home_dir .. "/" .. cwd
+		end
+	end
+end
+
+-- Setup full-stack development tabs
+wezterm.on("setup-fullstack-tabs", function(window, pane)
+	-- Check if tabs already exist to prevent duplicates
+	local tabs = window:mux_window():tabs()
+	local existing_tab_names = {}
+
+	for _, tab in ipairs(tabs) do
+		if tab:get_title() then
+			existing_tab_names[tab:get_title()] = true
+		end
+	end
+
+	-- Check if any of our target tabs already exist
+	local has_existing_tabs = false
+	for _, tab_config in ipairs(fullstack_tabs) do
+		if existing_tab_names[tab_config.name] then
+			has_existing_tabs = true
+			break
+		end
+	end
+
+	-- If setup already exists, do nothing
+	if has_existing_tabs then
+		wezterm.log_info("Full-stack tabs already exist, skipping setup")
+		return
+	end
+
+	-- Create each tab with its configuration
+	for i, tab_config in ipairs(fullstack_tabs) do
+		local resolved_cwd = resolve_path(tab_config.cwd, pane)
+		local tab, new_pane, new_window = window:mux_window():spawn_tab({
+			cwd = resolved_cwd,
+		})
+
+		-- Set the tab title
+		tab:set_title(tab_config.name)
+
+		-- Send the command to the new pane
+		if tab_config.command then
+			new_pane:send_text(tab_config.command .. "\n")
+		end
+
+		wezterm.log_info("Created tab: " .. tab_config.name .. " in " .. resolved_cwd)
+	end
+
+	-- Switch back to the first tab
+	window:perform_action(act.ActivateTab(0), pane)
+end)
+
 wezterm.on("update-status", function(window, pane)
 	local key_table = window:active_key_table() or "default"
 	window:set_left_status(" " .. key_table .. " ")
@@ -182,6 +279,7 @@ config.keys = {
 	{ key = "r", mods = "LEADER", action = act.ActivateKeyTable({ name = "resize_pane", one_shot = false }) },
 	{ key = "l", mods = "LEADER", action = act.EmitEvent("toggle-ligatures") },
 	{ key = "t", mods = "LEADER", action = act.EmitEvent("toggle-transparency") },
+	{ key = "f", mods = "LEADER", action = act.EmitEvent("setup-fullstack-tabs") },
 	{ key = "s", mods = "LEADER|SHIFT", action = wezterm.action({ EmitEvent = "save_session" }) },
 	{ key = "l", mods = "LEADER|SHIFT", action = wezterm.action({ EmitEvent = "load_session" }) },
 	{ key = "r", mods = "LEADER|SHIFT", action = wezterm.action({ EmitEvent = "restore_session" }) },

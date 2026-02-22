@@ -3,6 +3,12 @@ local M = {}
 function M.setup()
 	require("oil").setup({
 		default_file_explorer = true,
+		columns = {
+			"icon",
+			--"permissions",
+			--"size",
+			--"mtime",
+		},
 		watch_for_changes = true,
 		keymaps = {
 			["g?"] = "actions.show_help",

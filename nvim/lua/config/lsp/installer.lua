@@ -25,7 +25,10 @@ function M.setup(servers, server_options)
 	})
 
 	require("mason-lspconfig").setup({
-		ensure_installed = vim.tbl_keys(servers),
+		ensure_installed = vim.tbl_filter(function(server)
+			-- Exclude servers that are not available in Mason
+			return server ~= "kulala_ls"
+		end, vim.tbl_keys(servers)),
 		automatic_installation = false,
 	})
 
@@ -85,6 +88,12 @@ function M.setup(servers, server_options)
 			})
 		end,
 	})
+
+	-- Setup servers that are not managed by Mason
+	if servers["kulala_ls"] then
+		local opts = vim.tbl_deep_extend("force", server_options, servers["kulala_ls"] or {})
+		lspconfig.kulala_ls.setup(opts)
+	end
 end
 
 return M

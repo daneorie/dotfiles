@@ -82,6 +82,8 @@ function M.setup()
 		defaults = {
 			file_ignore_patterns = {
 				"^.git/",
+				"node%_modules/.*",
+				"vendor/.*",
 			},
 			mappings = {
 				n = n_mappings,
