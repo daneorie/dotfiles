@@ -1,7 +1,7 @@
 local M = {}
 
 function _G.set_terminal_keymaps()
-	local opts = { noremap = true, silent = true, buffer = bufnr }
+	local opts = { noremap = true, silent = true, buffer = 0 }
 	-- vim.keymap.set("t", "<esc>", [[<C-\><C-n>]], opts)
 	vim.keymap.set("t", "<C-n>", [[<C-\><C-n><C-W>h]], opts)
 	vim.keymap.set("t", "<C-e>", [[<C-\><C-n><C-W>j]], opts)
@@ -23,12 +23,12 @@ function M.setup()
 
 	toggleterm.setup({
 		size = 20,
-		open_mapping = { [[<c-`>]], [[<c-\>]] },
+		open_mapping = [[<c-\>]],
 		hide_numbers = true,
 		shade_terminals = true,
 		shading_factor = 2,
 		start_in_insert = true,
-		insert_mappings = true,
+		insert_mappings = false,
 		persist_size = true,
 		direction = "float",
 		close_on_exit = true,

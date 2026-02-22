@@ -31,6 +31,8 @@ vim.cmd([[
 
 	augroup filetypedetect
 		au! BufRead,BufNewFile *.jsx setfiletype javascript
+		au! BufRead,BufNewFile *.http setfiletype http
+		au! BufRead,BufNewFile *.rest setfiletype http
 	augroup END
 
 	" highlight yanked text for 200ms using the "Visual" highlight group
