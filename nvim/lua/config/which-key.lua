@@ -596,10 +596,41 @@ local function code_keymap()
 	end
 end
 
+local function rest_keymap()
+	vim.api.nvim_create_autocmd("FileType", {
+		pattern = { "http", "rest" },
+		callback = function()
+			vim.schedule(RestSetup)
+		end,
+		desc = "Setup kulala keymaps for HTTP files",
+	})
+
+	function RestSetup()
+		local bufnr = vim.api.nvim_get_current_buf()
+		local ft = vim.api.nvim_buf_get_option(bufnr, "filetype")
+
+		if ft == "http" or ft == "rest" then
+			local keymap_r = {
+				name = "HTTP/REST",
+				s = { "<cmd>lua require('kulala').run()<cr>", "Run request under cursor" },
+				a = { "<cmd>lua require('kulala').run_all()<cr>", "Run all requests" },
+				r = { "<cmd>lua require('kulala').replay()<cr>", "Replay last request" },
+				e = { "<cmd>lua require('kulala').set_selected_env()<cr>", "Select environment" },
+				b = { "<cmd>lua require('kulala').scratchpad()<cr>", "Open scratchpad" },
+			}
+
+			local k = { r = keymap_r }
+			local o = { mode = "n", silent = true, noremap = true, buffer = bufnr, prefix = "<leader>", nowait = true }
+			whichkey.register(k, o)
+		end
+	end
+end
+
 function M.setup()
 	normal_keymap()
 	visual_keymap()
 	code_keymap()
+	rest_keymap()
 end
 
 return M

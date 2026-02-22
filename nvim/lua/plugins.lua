@@ -394,41 +394,7 @@ require("lazy").setup({
 	-- REST
 	{
 		"mistweaverco/kulala.nvim",
-		keys = {
-			{ "<leader>Rs", desc = "Send request" },
-			{ "<leader>Ra", desc = "Send all requests" },
-			{ "<leader>Rb", desc = "Open scratchpad" },
-		},
 		ft = { "http", "rest" },
-		opts = {
-			global_keymaps = false,
-			global_keymaps_prefix = "<leader>R",
-			kulala_keymaps_prefix = "",
-		},
-	},
-	{
-		"mistweaverco/kulala.nvim",
-		ft = { "http", "rest" },
-		keys = {
-			{
-				"<localleader>rr",
-				"<cmd>lua require('kulala').run()<cr>",
-				desc = "Run request under the cursor",
-				ft = { "http", "rest" },
-			},
-			{
-				"<localleader>rl",
-				"<cmd>lua require('kulala').run_all()<cr>",
-				desc = "Run all requests",
-				ft = { "http", "rest" },
-			},
-			{
-				"<localleader>re",
-				"<cmd>lua require('kulala').set_selected_env()<cr>",
-				desc = "Select environment",
-				ft = { "http", "rest" },
-			},
-		},
 		config = function()
 			require("kulala").setup({
 				-- Request display options
