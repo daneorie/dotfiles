@@ -79,6 +79,26 @@ local spaces = function()
 end
 
 local navic = require("nvim-navic")
+
+-- Kulala environment component
+local function kulala_env()
+	-- Only show for http files
+	if vim.bo.filetype ~= "http" then
+		return ""
+	end
+	
+	local status, kulala = pcall(require, "kulala")
+	if not status then
+		return ""
+	end
+	
+	local env_status, env = pcall(kulala.get_selected_env)
+	if env_status and env and env ~= "" then
+		return "🌍 " .. tostring(env)
+	end
+	
+	return ""
+end
 local config = {
 	options = {
 		icons_enabled = true,
@@ -122,7 +142,7 @@ local config = {
 				return navic.is_available()
 			end
 		} },
-		lualine_c = {},
+		lualine_c = { kulala_env },
 		lualine_x = {},
 		lualine_y = {},
 		lualine_z = { { "tabs", mode = 2 } },
