@@ -1,0 +1,21 @@
+    {:des "kindaVim Colemak changes"
+     :rules [
+        [:condis ["kVNormal" 1]]
+        [:n :h]
+        [:e :j]
+        [:i :k]
+        [:o :l]
+        [:h :i]
+        [:j :o]
+        [:k :e]
+        [:l :n]
+        [:!Sn :!Sh]
+        [:!Se :!Sj]
+        [:!Si :!Sk]
+        [:!So :!Sl]
+        [:!Sh :!Si]
+        [:!Sj :!So]
+        [:!Sk :!Se]
+        [:!Sl :!Sn]
+      ]
+     }

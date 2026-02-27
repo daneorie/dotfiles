@@ -1,0 +1,161 @@
+# focus window
+#alt - n : yabai -m window --focus west
+#alt - e : yabai -m window --focus south
+#alt - i : yabai -m window --focus north
+#alt - o : yabai -m window --focus east
+alt - n : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "west" end) | max')"
+alt - e : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "south" end) | max')"
+alt - i : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "north" end) | max')"
+alt - o : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(if isempty(select(."has-focus")) then .id else "east" end) | max')"
+#alt - n : aerospace focus left
+#alt - e : aerospace focus down
+#alt - i : aerospace focus up
+#alt - o : aerospace focus right
+
+# swap managed window
+shift + alt - n : yabai -m window --swap west
+shift + alt - e : yabai -m window --swap south
+shift + alt - i : yabai -m window --swap north
+shift + alt - o : yabai -m window --swap east
+
+# move managed window
+shift + ctrl + alt - n : yabai -m window --warp west
+shift + ctrl + alt - e : yabai -m window --warp south
+shift + ctrl + alt - i : yabai -m window --warp north
+shift + ctrl + alt - o : yabai -m window --warp east
+
+# create stack
+ctrl + alt + cmd - n : yabai -m window --stack west
+ctrl + alt + cmd - e : yabai -m window --stack south
+ctrl + alt + cmd - i : yabai -m window --stack north
+ctrl + alt + cmd - o : yabai -m window --stack east
+#ctrl + alt + cmd - n : aerospace join-with left
+#ctrl + alt + cmd - e : aerospace join-with down
+#ctrl + alt + cmd - i : aerospace join-with up
+#ctrl + alt + cmd - o : aerospace join-with right
+
+# rotate tree
+alt - r : yabai -m space --rotate 90
+
+# toggle window fullscreen zoom
+alt - f : yabai -m window --toggle zoom-fullscreen
+
+# toggle padding and gap
+alt - g : yabai -m space --toggle padding; yabai -m space --toggle gap
+
+# float / unfloat window and center on screen
+alt - t : yabai -m window --toggle float;\
+		  yabai -m window --grid 4:4:1:1:2:2
+shift + alt - d : ~/dotfiles/yabai_manage_app_window.sh
+shift + alt - h : ~/dotfiles/yabai_manage_app_window.sh toggle_app
+
+# toggle window split type
+alt - h : yabai -m window --toggle split
+
+# balance size of windows
+shift + ctrl + alt - 0 : yabai -m space --balance
+#shift + ctrl + alt - 0 : aerospace balance-sizes
+
+# "swipe" workspaces
+#alt - tab: aerospace workspace $(( $(cat ~/.aerospace.fw) % $(cat $~/.aerospace.nw) + 1 ))
+#shift + alt - tab: aerospace workspace $(( ($(cat ~/.aerospace.fw) + 1) % $(cat ~/.aerospace.nw) + 1 ))
+
+# Arrow Keys - hjkl -> neio
+fn - n : skhd -k "left"
+fn - e : skhd -k "down"
+fn - i : skhd -k "up"
+fn - o : skhd -k "right"
+hyper - n : skhd -k "left"
+hyper - e : skhd -k "down"
+hyper - i : skhd -k "up"
+hyper - o : skhd -k "right"
+
+# move window and focus desktop
+shift + alt - 1 : yabai -m window --space 1; yabai -m space --focus 1
+shift + alt - 2 : yabai -m window --space 2; yabai -m space --focus 2
+shift + alt - 3 : yabai -m window --space 3; yabai -m space --focus 3
+shift + alt - 4 : yabai -m window --space 4; yabai -m space --focus 4
+shift + alt - 5 : yabai -m window --space 5; yabai -m space --focus 5
+shift + alt - 6 : yabai -m window --space 6; yabai -m space --focus 6
+shift + alt - 7 : yabai -m window --space 7; yabai -m space --focus 7
+shift + alt - 8 : yabai -m window --space 8; yabai -m space --focus 8
+shift + alt - 9 : yabai -m window --space 9; yabai -m space --focus 9
+shift + alt - 0 : yabai -m window --space 10; yabai -m space --focus 10
+#shift + alt - 1 : aerospace move-node-to-workspace 1; aerospace workspace 1
+#shift + alt - 2 : aerospace move-node-to-workspace 2; aerospace workspace 2
+#shift + alt - 3 : aerospace move-node-to-workspace 3; aerospace workspace 3
+#shift + alt - 4 : aerospace move-node-to-workspace 4; aerospace workspace 4
+#shift + alt - 5 : aerospace move-node-to-workspace 5; aerospace workspace 5
+#shift + alt - 6 : aerospace move-node-to-workspace 6; aerospace workspace 6
+#shift + alt - 7 : aerospace move-node-to-workspace 7; aerospace workspace 7
+#shift + alt - 8 : aerospace move-node-to-workspace 8; aerospace workspace 8
+#shift + alt - 9 : aerospace move-node-to-workspace 9; aerospace workspace 9
+#shift + alt - 0 : aerospace move-node-to-workspace 10; aerospace workspace 10
+
+# create desktop, move window and follow focus - uses jq for parsing json (brew install jq)
+shift + alt - c : yabai -m space --create && \
+				  index="$(yabai -m query --spaces --display | jq 'map(select(."native-fullscreen" == 0))[-1].index')" && \
+				  yabai -m window --space "${index}" && \
+				  yabai -m space --focus "${index}"
+
+
+# cycle through stack and floating windows
+#alt - 0x32 : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(select(."stack-index" == 1 or ."is-visible" and ."stack-index" == 0)) | sort_by(.frame.x, .frame.y, .id) | nth((index(map(select(."has-focus"))) + length - 1) % length).id')"
+
+# cycle through all windows in the space
+alt - 0x32 : yabai -m window --focus "$(yabai -m query --windows --space | jq -re 'map(select("is-visible")) | sort_by(.frame.x, .frame.y, .id) | nth((index(map(select(."has-focus"))) + length - 1) % length).id')"
+ 
+# cycle within a stack
+alt + cmd - 0x32 : yabai -m window --focus stack.prev || yabai -m window --focus stack.last
+alt + cmd - e : yabai -m window --focus stack.prev || yabai -m window --focus stack.last
+alt + cmd - i : yabai -m window --focus stack.next || yabai -m window --focus stack.first
+
+# fast focus desktop: cmd - `
+cmd - 0x32 : yabai -m display --focus "$(yabai -m query --spaces | jq -re 'max_by(.display).display as $max | .[] | (select(."has-focus").display + $max) % $max + 1')"
+shift + cmd - 0x32 : yabai -m display --focus "$(yabai -m query --spaces | jq -re 'max_by(.display).display as $max | .[] | (select(."has-focus").display + $max + 1) % $max + 1')"
+
+# send window to monitor and follow focus
+shift + alt - l : yabai -m window --display next; yabai -m display --focus next
+shift + alt - p : yabai -m window --display previous; yabai -m display --focus previous
+
+# restart
+meh - u: ~/dotfiles/ubersicht/restart_ubersicht.sh
+meh - y: kill -9 $(ps -ef | awk '{ if ($8 == "/usr/local/opt/yabai/bin/yabai") { print $2 } }')
+meh - s: kill -9 $(ps -ef | awk '{ if ($8 == "/usr/local/opt/skhd/bin/skhd") { print $2 } }')
+
+# change the sound input and output
+#hyper - 3: open "~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/Set Sound Control Output Device - Output1.app"
+#hyper - 4: open "~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/Set Sound Control Output Device - Output2.app"
+#meh - 7: open "~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/Set Sound Control Input Device - Input1.app"
+#meh - 8: open "~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/Set Sound Control Input Device - Input2.app"
+
+# open applications
+meh - 0x2C: open -nb org.alacritty --args --config-file ~/.config/alacritty/alacritty.yml # meh - /
+#------------------
+hyper - q: open -a "Activity Monitor"
+hyper - w: open -nb org.alacritty --args --config-file ~/.config/alacritty/alacritty.yml --title WikiIndex -e $SHELL -lc "tmux new -A -s 'WikiIndex' -n 'Index' 'source ~/.zshrc; cd $WIKI_HOME; nvim +WikiIndex; zsh -i'"
+hyper - f: osascript -e 'tell application "Finder"' -e 'set theWindow to make new Finder window' -e 'activate target of theWindow' -e 'end tell'
+hyper - p: open -a Photos
+hyper - g: open -nb org.alacritty --args --config-file ~/.config/alacritty/alacritty.yml --title WikiJournal -e $SHELL -lc "tmux new -A -s 'WikiJournal' -n 'Journal' 'source ~/.zshrc; cd $WIKI_HOME; nvim +WikiJournal'; zsh -i"
+#------------------
+#hyper - a: open -nb org.alacritty
+hyper - a: open -nb org.alacritty --args --config-file ~/.config/alacritty/alacritty.yml --title main -e $SHELL -lc "tmux-sessionizer; zsh -i"
+hyper - r: open -a Mail
+hyper - s: osascript -e 'tell application "Safari"' -e 'make new document' -e 'activate' -e 'end tell'
+hyper - t: open -a Notes && open -a Notes
+hyper - d: open -n -a Discord
+#------------------
+hyper - z: open -b "com.apple.systempreferences"
+hyper - x: open -a "Microsoft Excel"
+hyper - c: open -a Calendar
+#hyper - v: open -a 
+hyper - b: open -a Obsidian
+#------------------
+
+# increase window size
+shift + alt - w : yabai -m window --resize top:0:-20
+shift + alt - s : yabai -m window --resize right:20:0
+
+# decrease window size
+shift + alt - r : yabai -m window --resize top:0:20
+shift + alt - a : yabai -m window --resize right:-20:0

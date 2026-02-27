@@ -1,0 +1,13 @@
+    {:des "Home Row Mods: CAGS"
+     :rules [
+        [:##a :left_control nil {:alone :##a}]
+        [:##r :left_option nil {:alone :##r}]
+        [:##s :left_command nil {:alone :##s}]
+        [:##t :left_shift nil {:alone :##t}]
+
+        [:##n :right_shift nil {:alone :##n}]
+        [:##e :right_command nil {:alone :##e}]
+        [:##i :right_option nil {:alone :##i}]
+        [:##o :right_control nil {:alone :##o}]
+     ]
+    }

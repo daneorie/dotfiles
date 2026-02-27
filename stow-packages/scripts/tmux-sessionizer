@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+DEBUG=0
+logfile=~/tmux-sessionizer.log
+
+log() {
+	[[ -n $DEBUG ]] && echo "$@" >>"$logfile"
+}
+
+log "running tmux-sessionizer"
+
+if [[ $# -eq 1 ]]; then
+	selected=$1
+else
+	selected=$(
+		echo "$(
+			ls -d ~/dotfiles
+			find ~/repos -mindepth 1 -maxdepth 1 -type d
+		)" | fzf
+	)
+fi
+log "selected: $selected"
+
+if [[ -z $selected ]]; then
+	log non selected >>~/tmp.txt
+	exit 0
+fi
+
+selected_name=$(basename "$selected" | tr . _)
+tmux_running=$(pgrep tmux)
+log "selected name: $selected_name"
+log "tmux_running: $tmux_running"
+
+# tmux is not running, let alone in this terminal
+if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
+	log "tmux is not running, let alone in this terminal"
+	tmux new-session -s "$selected_name" -c "$selected"
+	exit 0
+fi
+
+# tmux is running, but not in this terminal
+if [[ -z $TMUX ]] && tmux has-session -t="$selected_name" 2>/dev/null; then
+	log "tmux is running but not in this terminal/client"
+	# detach the session from any other client
+	tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+# tmux is running and in this terminal, but the session does not exist
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+	log "tmux is running but not in this terminal/client"
+	# detach the session from any other client
+	tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+log "switching client"
+tmux switch-client -t "$selected_name"

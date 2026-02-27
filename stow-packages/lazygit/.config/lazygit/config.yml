@@ -1,0 +1,30 @@
+git:
+  paging:
+    colorArg: always
+    pager: nvimpager
+keybinding:
+  universal:
+    prevItem-alt: "i" # go one line up
+    nextItem-alt: "e" # go one line down
+    scrollLeft: "N" # scroll left within list view
+    scrollRight: "O" # scroll right within list view
+    prevBlock-alt: "n" # goto the previous block / panel
+    nextBlock-alt: "o" # goto the next block / panel
+    nextMatch: "j"
+    prevMatch: "J"
+    new: "j"
+    edit: "l"
+    openFile: "k"
+    scrollUpMain-alt1: "I" # main panel scroll up
+    scrollDownMain-alt1: "E" # main panel scroll down
+  files:
+    ignoreFile: "h"
+  branches:
+    createPullRequest: "k"
+    viewPullRequestOptions: "K"
+    viewGitFlowOptions: "h"
+  commits:
+    moveUpCommit: "<c-y>" # move commit up one
+    moveDownCommit: "<c-u>" # move commit down one
+  submodules:
+    init: "h"

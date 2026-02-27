@@ -1,0 +1,8 @@
+    {:des "Fn+Arrows: Volume Control"
+     :rules [
+        [:!Fup_arrow :volume_increment]
+        [:!Fdown_arrow :volume_decrement]
+        [:!Fleft_arrow :mute]
+        ;[:Fright_arrow :volume_down]
+     ]
+    }

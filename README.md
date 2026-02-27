@@ -1,6 +1,176 @@
-# Computer Setup
+# Dotfiles
 
-## To be sorted
+A modular dotfiles configuration managed with [GNU Stow](https://www.gnu.org/software/stow/).
+
+## Quick Start
+
+1. **Install GNU Stow**
+   ```bash
+   # macOS
+   brew install stow
+   
+   # Ubuntu/Debian
+   sudo apt install stow
+   
+   # Arch Linux
+   sudo pacman -S stow
+   ```
+
+2. **Clone this repository**
+   ```bash
+   git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+   cd ~/dotfiles
+   ```
+
+3. **Install packages**
+   ```bash
+   # Install core packages (shell, terminal, etc.)
+   ./install.sh --core
+   
+   # Install all packages
+   ./install.sh --all
+   
+   # Install specific packages
+   ./install.sh zsh wezterm tmux git
+   ```
+
+## Package Structure
+
+This repository is organized into modular packages that can be installed independently:
+
+### Core Packages
+- **zsh** - ZSH shell configuration with modular structure
+- **wezterm** - WezTerm terminal configuration
+- **tmux** - Terminal multiplexer configuration  
+- **git** - Git configuration and attributes
+- **vim** - Vim/Neovim and related editor configurations
+- **nvim** - Neovim configuration
+- **yabai** - Yabai window manager and skhd hotkey daemon
+
+### GUI Applications
+- **alacritty** - Alacritty terminal configuration
+- **kitty** - Kitty terminal configuration
+- **hammerspoon** - Hammerspoon automation
+- **karabiner** - Karabiner-Elements key remapping
+- **aerospace** - AeroSpace window manager
+- **sketchybar** - SketchyBar status bar
+- **yazi** - Yazi file manager
+- **gitui** - Git TUI configuration
+- **lazygit** - LazyGit TUI configuration
+- **borders** - JankyBorders configuration
+- **ubersicht** - Übersicht desktop widgets
+- **nvimpager** - Neovim-based pager
+
+### Other
+- **scripts** - Utility scripts
+
+## Usage Examples
+
+```bash
+# List all available packages
+./install.sh --list
+
+# Preview what would be installed (dry run)
+./install.sh --dry-run --all
+
+# Install core packages
+./install.sh --core
+
+# Install specific packages
+./install.sh zsh wezterm git
+
+# Remove a package
+./install.sh --unstow zsh
+
+# Install everything
+./install.sh --all
+```
+
+## How It Works
+
+This setup uses GNU Stow to create symlinks from the package directories to your home directory. Each package contains the directory structure that mirrors where the files should be placed in your home directory.
+
+For example:
+- `stow-packages/zsh/.zshrc` → `~/.zshrc`
+- `stow-packages/nvim/.config/nvim/` → `~/.config/nvim/`
+- `stow-packages/wezterm/.wezterm.lua` → `~/.wezterm.lua`
+
+## Modular Configuration
+
+Several configurations are split into modular files for better organization:
+
+### ZSH Configuration
+The ZSH configuration is split into focused modules:
+- `shell/config/environment.zsh` - Environment variables and PATH
+- `shell/config/aliases.zsh` - Command aliases  
+- `shell/config/functions.zsh` - Custom functions
+- `shell/config/keybindings.zsh` - Shell options and keybindings
+- `shell/config/plugins.zsh` - Plugin management
+- `shell/config/prompt.zsh` - Prompt configuration
+- `shell/config/fzf.zsh` - FZF fuzzy finder setup
+
+### WezTerm Configuration  
+The WezTerm configuration is modularized into:
+- `wezterm/utils.lua` - Utility functions
+- `wezterm/appearance.lua` - Visual configuration
+- `wezterm/neovim.lua` - Neovim integration
+- `wezterm/workspace.lua` - Workspace management
+- `wezterm/events.lua` - Event handlers
+- `wezterm/keybindings.lua` - Key bindings
+- `wezterm/key_tables.lua` - Modal key tables
+
+Both configurations are **symlink-aware** and will work correctly whether the main config files are symlinked or not.
+
+## Adding New Packages
+
+To add a new package:
+
+1. Create a new directory under `stow-packages/`
+2. Structure it to mirror your home directory
+3. Add the package name to the appropriate array in `install.sh`
+4. Test with `./install.sh --dry-run <package-name>`
+
+## Troubleshooting
+
+- **Conflicts**: If stow reports conflicts, you may have existing files. Back them up and try again.
+- **Missing dependencies**: Some configurations may require specific tools to be installed first.
+- **Broken symlinks**: Use `./install.sh --unstow <package>` to remove and then reinstall.
+
+## Testing
+
+### Docker Testing Environment
+
+Test your stow setup safely in an isolated Docker environment:
+
+```bash
+# Run automated tests
+./test-stow.sh auto
+
+# Interactive testing
+./test-stow.sh interactive
+
+# Quick setup for manual testing
+./test-stow.sh setup
+```
+
+The Docker environment includes:
+- ✅ Pre-configured test scenario with mock existing files
+- ✅ All necessary tools (stow, zsh, nvim, etc.)
+- ✅ Isolated environment that won't affect your host system
+- ✅ Comprehensive test suite covering all functionality
+
+See [TESTING.md](TESTING.md) for detailed testing instructions.
+
+---
+
+## Legacy Setup Information
+
+<details>
+<summary>Click to expand original manual setup instructions</summary>
+
+This section contains the original manual setup instructions that have been superseded by the Stow-based approach above.
+
+### To be sorted
 
 ```bash
 brew install ripgrep
@@ -18,7 +188,7 @@ brew install kindavim
 brew install hammerspoon
 ```
 
-## Basic Setup
+### Basic Setup
 
 Symlink a bunch of files and folders
 
@@ -43,7 +213,6 @@ ln -s ~/dotfiles/ubersicht/widgets/ ~/Library/Application\ Support/Übersicht/
 ln -s ~/dotfiles/sketchybar ~/.config/
 ln -s ~/dotfiles/hammerspoon ~/.hammerspoon
 ln -s ~/dotfiles/aerospace ~/.config/
-
 
 # scripts
 ln -s ~/dotfiles/scripts/tmux-sessionizer ~/.local/bin/
@@ -129,7 +298,7 @@ Set or create an environment variable NVIM_HOME in the 'rc' file to the location
 set NVIM_HOME="/path/to/nvim/"
 ```
 
-## Java LSP Setup (configuration files are already setup)
+### Java LSP Setup (configuration files are already setup)
 
 Download [eclipse.jdt.ls](https://github.com/eclipse/eclipse.jdt.ls#installation) to `/Library/Java/LanguageServers`
 
@@ -161,138 +330,12 @@ npm install
 npm run build-plugin
 ```
 
-## Plugin List
+### Plugin List
 
-- [packer.nvim](https://github.com/wbthomason/packer.nvim)
+[Extended plugin list for Neovim - see original README for complete list]
 
--- Lua Development
+</details>
 
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-- [popup.nvim](https://github.com/nvim-lua/popup.nvim)
-- [lua-dev.nvim](https://github.com/folke/lua-dev.nvim)
+---
 
--- LSP
-
-- [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)
-- [mason.nvim](https://github.com/williamboman/mason.nvim)
-- [mason-lspconfig.nvim](https://github.com/williamboman/mason-lspconfig.nvim)
-- [null-ls.nvim](https://github.com/jose-elias-alvarez/null-ls.nvim)
-- [lsp_signature.nvim](https://github.com/ray-x/lsp_signature.nvim)
-- [nvim-navic](https://github.com/SmiteshP/nvim-navic)
-- [symbols-outline.nvim](https://github.com/simart39/symbols-outline.nvim)
-- [SchemaStore.nvim](https://github.com/b0o/SchemaStore.nvim)
-- [vim-illuminate](https://github.com/RRethy/vim-illuminate)
-- [fidget.nvim](https://github.com/j-hui/fidget.nvim)
-- [lsp-inlayhints.nvim](https://github.com/lvimuser/lsp-inlayhints.nvim)
-- [lsp_line.nvim](https://git.sr.ht/~whynothugo/lsp_lines.nvim)
-- [folding-nvim](https://github.com/pierreglaser/folding-nvim)
-
--- Completion
-
-- [nvim-cmp](https://github.com/hrsh7th/nvim-cmp)
-- [cmp-buffer](https://github.com/hrsh7th/cmp-buffer)
-- [cmp-path](https://github.com/hrsh7th/cmp-path)
-- [cmp_luasnip](https://github.com/saadparwaiz1/cmp_luasnip)
-- [cmp-nvim-lsp](https://github.com/hrsh7th/cmp-nvim-lsp)
-- [cmp-nvim-lua](https://github.com/hrsh7th/cmp-nvim-lua)
-
--- Snippets
-
-- [LuaSnip](https://github.com/L3MON4D3/LuaSnip)
-- [friendly-snippets](https://github.com/rafamadriz/friendly-snippets)
-
--- Syntax/Treesitter
-
-- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
-- [nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
-- ~~[nvim-surround](https://github.com/kylechui/nvim-surround)~~
-
--- Marks
-
-- [harpoon](https://github.com/christianchiarulli/harpoon)
-- [vim-bookmarks](https://github.com/MattesGroeger/vim-bookmarks)
-- [sessions.nvim](https://github.com/natecraddock/sessions.nvim)
-- [workspaces.nvim](https://github.com/natecraddock/workspaces.nvim)
-
--- Fuzzy Finder/Telescope
-
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
-- [telescope-ui-select.nvim](https://github.com/nvim-telescope/telescope-ui-select.nvim)
-- [telescope-fzf-native.nvim](https://github.com/nvim-telescope/telescope-fzf-native.nvim)
-- [telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim)
-- [telescope-vim-bookmark.nvim](https://github.com/tom-anders/telescope-vim-bookmark.nvim)
-
--- Note Taking
-
-- [orgmode](https://github.com/nvim-orgmode/orgmode)
-
--- Colorschemes
-
-- [nightfox.nvim](https://github.com/EdenEast/nightfox.nvim)
-
--- Utility
-
-- [impatient.nvim](https://github.com/lewis6991/impatient.nvim)
-- ~~[coc.nvim](https://github.com/neoclide/coc.nvim)~~
-- [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
-
--- Icon
-
-- [nvim-web-devicons](https://github.com/kyazdani42/nvim-web-devicons)
-- ~~[vim-devicons](https://github.com/ryanoasis/vim-devicons)~~
-
--- Debugging
-
-- [nvim-dap](https://github.com/mfussenegger/nvim-dap)
-- [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
-- ~~[DAPInstall.nvim](https://github.com/ravenxrz/DAPInstall.nvim)~~
-
--- Tabline
-
-- [vim-buffet](https://github.com/bagrat/vim-buffet)
-
--- Statusline
-
-- [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim)
-
--- Startup
-
-- [vim-startify](https://github.com/mhinz/vim-startify)
-
--- Indent
-
-- [indent-blankline.nvim](https://github.com/lukas-reineke/indent-blankline.nvim)
-
--- File Explorer
-
-- [nvim-tree](https://github.com/kyazdani42/nvim-tree.lua)
-- ~~[nerdtree](https://github.com/preservim/nerdtree)~~
-
--- Comment
-
-- [nerdcommenter](https://github.com/preservim/nerdcommenter)
-
--- Terminal
-
-- [toggleterm.nvim](https://github.com/akinsho/toggleterm.nvim)
-
--- Git
-
-- [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim)
-- ~~[nerdtree-git-plugin](https://github.com/Xuyuanp/nerdtree-git-plugin)~~
-
--- Editing support
-
-- [nvim-autopairs](https://github.com/windwp/nvim-autopairs)
-
--- Keybinding
-
-- [whick-key.nvim](https://github.com/folke/which-key.nvim)
-
--- Java
-
-- [nvim-jdtls](https://github.com/mfussenegger/nvim-jdtls)
-
--- Markdown
-
-- [markdown-preview.nvim](https://github.com/iamcco/markdown-preview.nvim)
+*Managed with ❤️ using GNU Stow*

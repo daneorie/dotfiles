@@ -1,0 +1,16 @@
+map n h
+map N H
+map e j
+map E J
+map i k
+map I K
+map o l
+map O L
+#map h i
+#map H I
+#map k o
+#map K O
+#map l e
+#map L E
+#map j n
+#map J N
