@@ -1,5 +1,5 @@
 # ~/.zshrc - Main ZSH Configuration File
-# This file loads modular configuration files for better organization
+# This file loads modular configuration files
 
 # Configuration directory
 ZSH_CONFIG_DIR="$HOME/dotfiles/shell/config"
