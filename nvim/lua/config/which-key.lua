@@ -617,11 +617,24 @@ local function rest_keymap()
 				r = { "<cmd>lua require('kulala').replay()<cr>", "Replay last request" },
 				e = { "<cmd>lua require('kulala').set_selected_env()<cr>", "Select environment" },
 				b = { "<cmd>lua require('kulala').scratchpad()<cr>", "Open scratchpad" },
+				f = { "<cmd>silent! %!kulala-fmt format --stdin<cr>", "Format HTTP file" },
+			}
+
+			-- Additional direct keymaps for HTTP files
+			local direct_keymaps = {
+				["<CR>"] = { "<cmd>lua require('kulala').run()<cr>", "Run request under cursor" },
+				["<localleader>gd"] = { vim.lsp.buf.definition, "Go to definition" },
+				["<localleader>gr"] = { vim.lsp.buf.references, "Find references" },
+				["<localleader>K"] = { vim.lsp.buf.hover, "Show hover documentation" },
 			}
 
 			local k = { r = keymap_r }
 			local o = { mode = "n", silent = true, noremap = true, buffer = bufnr, prefix = "<leader>", nowait = true }
 			whichkey.register(k, o)
+
+			-- Register direct keymaps without prefix
+			local direct_o = { mode = "n", silent = true, noremap = true, buffer = bufnr, nowait = true }
+			whichkey.register(direct_keymaps, direct_o)
 		end
 	end
 end

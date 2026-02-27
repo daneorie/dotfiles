@@ -407,6 +407,7 @@ require("lazy").setup({
 					max_width = 120,
 					max_height = 40,
 				},
+				default_env = "sandbox",
 			})
 
 			-- Set up keybindings for kulala response buffers
