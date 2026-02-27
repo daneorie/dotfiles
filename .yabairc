@@ -39,33 +39,19 @@ yabai -m config mouse_drop_action swap
 
 # general space settings
 yabai -m config layout bsp
-yabai -m config top_padding 0
+yabai -m config top_padding 25
 yabai -m config bottom_padding 15
 yabai -m config left_padding 15
 yabai -m config right_padding 15
 yabai -m config window_gap 15
 
 check_displays() {
-	no_of_displays=$(yabai -m query --displays | jq 'length')
-	if [ $no_of_displays -eq 3 ]; then
-		display=2
-		a=$(yabai -m query --spaces --display $display | jq 'min_by(.index).index - 1')
-		no_of_spaces=$(yabai -m query --spaces --display $display | jq 'max_by(.index).index')
-		while [ $a -lt $no_of_spaces ]; do
-			a=$(expr $a + 1)
-			yabai -m config --space $a top_padding 35
-		done
-
-		display=3
-		a=$(yabai -m query --spaces --display $display | jq 'min_by(.index).index - 1')
-		no_of_spaces=$(yabai -m query --spaces --display $display | jq 'max_by(.index).index')
-		while [ $a -lt $no_of_spaces ]; do
-			a=$(expr $a + 1)
-			yabai -m config --space $a top_padding 35
-		done
-	else
-		yabai -m config top_padding 0
-	fi
+	a=$(yabai -m query --spaces --display 1 | jq 'min_by(.index).index - 1')
+	no_of_spaces=$(yabai -m query --spaces --display 1 | jq 'max_by(.index).index')
+	while [ $a -lt $no_of_spaces ]; do
+		a=$(($a + 1))
+		yabai -m config --space $a top_padding 0
+	done
 }
 check_displays
 
