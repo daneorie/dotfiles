@@ -11,7 +11,19 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STOW_DIR="$SCRIPT_DIR/stow-packages"
+
+# Try to find stow-packages directory - handle both normal structure and Docker testing
+if [[ -d "$SCRIPT_DIR/stow-packages" ]]; then
+    # Docker testing environment - stow-packages is in the same directory
+    STOW_DIR="$SCRIPT_DIR/stow-packages"
+elif [[ -d "$(dirname "$SCRIPT_DIR")/stow-packages" ]]; then
+    # Normal structure - stow-packages is in parent directory
+    PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+    STOW_DIR="$PROJECT_ROOT/stow-packages"
+else
+    # Last resort - check current directory
+    STOW_DIR="./stow-packages"
+fi
 
 echo -e "${BLUE}Verifying Stow Package Structure${NC}"
 echo ""

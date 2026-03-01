@@ -24,14 +24,20 @@ A modular dotfiles configuration managed with [GNU Stow](https://www.gnu.org/sof
 
 3. **Install packages**
    ```bash
-   # Install core packages (shell, terminal, etc.)
-   ./install.sh --core
+   # Using Make (recommended)
+   make install-core           # Install core packages
+   make install-all            # Install all packages
+   make install PACKAGES="zsh git tmux"  # Install specific packages
    
-   # Install all packages
-   ./install.sh --all
+   # Using Just (alternative)
+   just install-core           # Install core packages  
+   just install-all            # Install all packages
+   just install zsh git tmux   # Install specific packages
    
-   # Install specific packages
-   ./install.sh zsh wezterm tmux git
+   # Using scripts directly
+   ./scripts/install.sh --core
+   ./scripts/install.sh --all
+   ./scripts/install.sh zsh git tmux
    ```
 
 ## Package Structure
@@ -67,23 +73,68 @@ This repository is organized into modular packages that can be installed indepen
 ## Usage Examples
 
 ```bash
-# List all available packages
-./install.sh --list
+# Task runners (recommended)
+make list                    # List all available packages
+make dry-run                 # Preview core installation
+make install-core            # Install core packages
+make install PACKAGES="zsh git tmux"  # Install specific packages
+make uninstall PACKAGES="zsh git"     # Remove packages
+make migrate                 # Migrate existing dotfiles
+make test                    # Run comprehensive tests
 
-# Preview what would be installed (dry run)
-./install.sh --dry-run --all
+# Or using Just
+just list                    # List all available packages
+just dry-run                 # Preview core installation  
+just install-core            # Install core packages
+just install zsh git tmux    # Install specific packages
+just uninstall zsh git       # Remove packages
 
-# Install core packages
-./install.sh --core
+# Direct script usage
+./scripts/install.sh --list
+./scripts/install.sh --dry-run --all
+./scripts/install.sh --core
+./scripts/install.sh zsh wezterm git
 
-# Install specific packages
-./install.sh zsh wezterm git
-
-# Remove a package
-./install.sh --unstow zsh
+# Remove a package  
+./scripts/install.sh --unstow zsh
 
 # Install everything
-./install.sh --all
+make install-all
+# OR
+./scripts/install.sh --all
+```
+
+## Task Runners
+
+This repository includes modern task runners for easier management:
+
+### Make (Makefile)
+```bash
+make help                    # Show all available commands
+make install-core            # Install essential packages
+make install PACKAGES="zsh git"  # Install specific packages
+make test                    # Run comprehensive tests
+make migrate                 # Migrate existing dotfiles
+make status                  # Show current dotfiles status
+```
+
+### Just (justfile) 
+Install [Just](https://github.com/casey/just) for an alternative task runner:
+```bash
+just help                   # Show all available commands
+just install-core           # Install essential packages
+just install zsh git        # Install specific packages (simpler syntax)
+just test                   # Run comprehensive tests
+just migrate                # Migrate existing dotfiles
+```
+
+### Direct Script Usage
+You can also run scripts directly:
+```bash
+./scripts/install.sh --help    # Package management
+./scripts/migrate.sh           # Migration workflow
+./scripts/verify.sh            # Verify package structure
+./scripts/test.sh              # Docker testing
 ```
 
 ## How It Works
@@ -128,13 +179,13 @@ To add a new package:
 1. Create a new directory under `stow-packages/`
 2. Structure it to mirror your home directory
 3. Add the package name to the appropriate array in `install.sh`
-4. Test with `./install.sh --dry-run <package-name>`
+4. Test with `make dry-run` or `./scripts/install.sh --dry-run <package-name>`
 
 ## Troubleshooting
 
 - **Conflicts**: If stow reports conflicts, you may have existing files. Back them up and try again.
 - **Missing dependencies**: Some configurations may require specific tools to be installed first.
-- **Broken symlinks**: Use `./install.sh --unstow <package>` to remove and then reinstall.
+- **Broken symlinks**: Use `make uninstall PACKAGES="package"` or `./scripts/install.sh --unstow <package>` to remove and then reinstall.
 
 ## Testing
 

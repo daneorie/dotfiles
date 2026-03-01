@@ -15,6 +15,17 @@ NC='\033[0m' # No Color
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Try to find install.sh - handle both normal structure and Docker testing
+if [[ -f "$SCRIPT_DIR/install.sh" ]]; then
+    # Scripts are in the same directory (Docker testing or scripts/ directory)
+    INSTALL_SCRIPT="$SCRIPT_DIR/install.sh"
+    PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"  # For compatibility with existing checks
+else
+    # Fallback to relative path
+    INSTALL_SCRIPT="./install.sh"
+    PROJECT_ROOT="."  # Current directory
+fi
+
 echo -e "${BLUE}Dotfiles Migration to GNU Stow${NC}"
 echo "This script will help you migrate from manual symlinks to GNU Stow management."
 echo ""
@@ -155,14 +166,14 @@ main() {
             perform_backup "false"
             echo ""
             echo -e "${BLUE}Installing core packages with stow...${NC}"
-            ./install.sh --core
+            cd "$PROJECT_ROOT" && ./scripts/install.sh --core
             ;;
         2)
             echo -e "${BLUE}Backing up existing files and installing all packages...${NC}"
             perform_backup "false"
             echo ""
             echo -e "${BLUE}Installing all packages with stow...${NC}"
-            ./install.sh --all
+            cd "$PROJECT_ROOT" && ./scripts/install.sh --all
             ;;
         3)
             echo -e "${BLUE}Dry run - showing what would be backed up...${NC}"
@@ -172,7 +183,7 @@ main() {
             echo -e "${BLUE}Backing up existing files only...${NC}"
             perform_backup "false"
             echo ""
-            echo -e "${YELLOW}Files backed up. Run './install.sh --core' or './install.sh --all' when ready to install with stow.${NC}"
+            echo -e "${YELLOW}Files backed up. Run './scripts/install.sh --core' or './scripts/install.sh --all' when ready to install with stow.${NC}"
             ;;
         5)
             echo -e "${YELLOW}Migration cancelled${NC}"
@@ -190,15 +201,15 @@ main() {
         echo "Your dotfiles are now managed by GNU Stow!"
         echo ""
         echo "Useful commands:"
-        echo "  ./install.sh --list                 # List all packages"
-        echo "  ./install.sh --unstow <package>     # Remove a package" 
-        echo "  ./install.sh <package>              # Install a specific package"
+        echo "  ./scripts/install.sh --list                 # List all packages"
+        echo "  ./scripts/install.sh --unstow <package>     # Remove a package" 
+        echo "  ./scripts/install.sh <package>              # Install a specific package"
     fi
 }
 
-# Check if we're in the right directory
-if [[ ! -f "install.sh" ]]; then
-    echo -e "${RED}Error: install.sh not found. Please run this script from the dotfiles directory.${NC}"
+# Check if we're in the right directory and install script exists
+if [[ ! -f "$INSTALL_SCRIPT" ]]; then
+    echo -e "${RED}Error: install.sh not found at $INSTALL_SCRIPT. Please run this script from the dotfiles directory or ensure the project structure is correct.${NC}"
     exit 1
 fi
 
