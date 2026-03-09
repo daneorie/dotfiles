@@ -20,11 +20,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -f "$SCRIPT_DIR/install.sh" ]]; then
 	# Scripts are in the same directory (Docker testing or scripts/ directory)
 	INSTALL_SCRIPT="$SCRIPT_DIR/install.sh"
-	PROJECT_ROOT="$(dirname "$SCRIPT_DIR")" # For compatibility with existing checks
+	PROJECT_ROOT="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)" # Ensure absolute path
 else
 	# Fallback to relative path
 	INSTALL_SCRIPT="./install.sh"
-	PROJECT_ROOT="." # Current directory
+	PROJECT_ROOT="$(cd "." && pwd)" # Current directory as absolute path
 fi
 
 # Configuration
@@ -250,6 +250,36 @@ is_old_dotfiles_symlink() {
 	return 1
 }
 
+# Check if a directory conflicts with stow and needs handling
+needs_stow_conflict_resolution() {
+	local target="$1"
+	
+	# If it's a symlink to old dotfiles, it needs resolution
+	if is_old_dotfiles_symlink "$target"; then
+		return 0
+	fi
+	
+	# If it's a regular directory that would prevent stow from creating symlinks, it needs resolution
+	if [[ -d "$target" && ! -L "$target" ]]; then
+		# For .config directory specifically, we need to check if any of our packages want to link into it
+		if [[ "$(basename "$target")" == ".config" ]]; then
+			# Check if any package wants to create .config/something
+			local packages_need_config=false
+			for package in "$PACKAGES_DIR"/*; do
+				if [[ -d "$package" && -d "$package/.config" ]]; then
+					packages_need_config=true
+					break
+				fi
+			done
+			if $packages_need_config; then
+				return 0
+			fi
+		fi
+	fi
+	
+	return 1
+}
+
 # Function to backup and remove existing files/symlinks
 backup_existing() {
 	local file="$1"
@@ -257,27 +287,34 @@ backup_existing() {
 
 	if [[ -e "$target" || -L "$target" ]]; then
 		if [[ "$DRY_RUN" == "true" ]]; then
-			if is_old_dotfiles_symlink "$target"; then
-				echo "Would remove conflicting old dotfiles symlink: $file"
+			if needs_stow_conflict_resolution "$target"; then
+				echo "Would resolve stow conflict for: $file"
 			else
 				echo "Would backup: $file"
 			fi
 		else
-			# Check if this is an old dotfiles symlink that conflicts with stow
-			if is_old_dotfiles_symlink "$target"; then
-				echo -e "${YELLOW}Removing conflicting old dotfiles symlink: $file${NC}"
-				local link_target=$(readlink "$target")
-				echo -e "${BLUE}  Old symlink pointed to: $link_target${NC}"
-				
-				# If the old symlink target contains actual files, back them up
-				if [[ -d "$link_target" ]] && [[ -n "$(ls -A "$link_target" 2>/dev/null)" ]]; then
-					echo -e "${YELLOW}  Backing up files from old location: $link_target${NC}"
+			# Check if this needs stow conflict resolution
+			if needs_stow_conflict_resolution "$target"; then
+				if is_old_dotfiles_symlink "$target"; then
+					echo -e "${YELLOW}Removing conflicting old dotfiles symlink: $file${NC}"
+					local link_target=$(readlink "$target")
+					echo -e "${BLUE}  Old symlink pointed to: $link_target${NC}"
+					
+					# If the old symlink target contains actual files, back them up
+					if [[ -d "$link_target" ]] && [[ -n "$(ls -A "$link_target" 2>/dev/null)" ]]; then
+						echo -e "${YELLOW}  Backing up files from old location: $link_target${NC}"
+						mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+						cp -r "$link_target" "$BACKUP_DIR/$file-old-location"
+					fi
+					
+					# Remove the conflicting symlink
+					rm "$target"
+				else
+					# Handle regular directory that conflicts with stow
+					echo -e "${YELLOW}Backing up conflicting directory: $file${NC}"
 					mkdir -p "$BACKUP_DIR/$(dirname "$file")"
-					cp -r "$link_target" "$BACKUP_DIR/$file-old-location"
+					mv "$target" "$BACKUP_DIR/$file"
 				fi
-				
-				# Remove the conflicting symlink
-				rm "$target"
 			else
 				echo -e "${YELLOW}Backing up existing: $file${NC}"
 
@@ -412,6 +449,21 @@ perform_migration() {
 			echo ""
 			echo -e "${BLUE}Installing packages with stow...${NC}"
 			cd "$PROJECT_ROOT"
+			
+			# Pre-installation: Handle .config directory conflicts safely
+			if [[ -e "$HOME/.config" ]]; then
+				if [[ -L "$HOME/.config" ]]; then
+					echo -e "${YELLOW}Found existing .config symlink from previous stow operations${NC}"
+					echo -e "${YELLOW}Removing .config symlink to allow proper multi-package stow management${NC}"
+					local old_target=$(readlink "$HOME/.config")
+					echo -e "${BLUE}  Old .config pointed to: $old_target${NC}"
+					rm "$HOME/.config"
+				elif [[ -d "$HOME/.config" ]]; then
+					echo -e "${BLUE}Found existing .config directory - packages will merge safely${NC}"
+					echo -e "${BLUE}Each package will only manage its own subdirectory within .config${NC}"
+					# Note: Individual packages will handle their own .config conflicts during installation
+				fi
+			fi
 			
 			# Convert space-separated to individual installs
 			for package in $packages; do

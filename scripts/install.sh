@@ -16,16 +16,32 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Try to find stow-packages directory - handle both normal structure and Docker testing
+# First, try to resolve all paths to absolute paths to avoid stow issues
 if [[ -d "$SCRIPT_DIR/stow-packages" ]]; then
     # Docker testing environment - stow-packages is in the same directory
-    STOW_DIR="$SCRIPT_DIR/stow-packages"
+    STOW_DIR="$(cd "$SCRIPT_DIR/stow-packages" && pwd)"
 elif [[ -d "$(dirname "$SCRIPT_DIR")/stow-packages" ]]; then
     # Normal structure - stow-packages is in parent directory
-    PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+    PROJECT_ROOT="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
     STOW_DIR="$PROJECT_ROOT/stow-packages"
 else
-    # Last resort - check current directory
-    STOW_DIR="./stow-packages"
+    # Last resort - check current directory and make it absolute
+    if [[ -d "./stow-packages" ]]; then
+        STOW_DIR="$(cd "./stow-packages" && pwd)"
+    else
+        # Try one more approach - look for stow-packages relative to where we think we are
+        if [[ -d "../stow-packages" ]]; then
+            STOW_DIR="$(cd "../stow-packages" && pwd)"
+        else
+            echo "ERROR: Cannot find stow-packages directory"
+            echo "Looked in:"
+            echo "  $SCRIPT_DIR/stow-packages"
+            echo "  $(dirname "$SCRIPT_DIR")/stow-packages"
+            echo "  ./stow-packages"
+            echo "  ../stow-packages"
+            exit 1
+        fi
+    fi
 fi
 
 # Check if stow is installed
@@ -142,6 +158,50 @@ convert_to_absolute_symlinks() {
     done
 }
 
+# Clean up any potential stow conflicts
+cleanup_stow_conflicts() {
+    local package="$1"
+    echo -e "${YELLOW}Cleaning up potential stow conflicts for package: $package${NC}"
+    
+    # Remove any broken symlinks that might interfere
+    find "$HOME" -maxdepth 2 -type l -exec test ! -e {} \; -delete 2>/dev/null || true
+    
+    # Handle .config directory specially - this is the main source of conflicts
+    if [[ -e "$HOME/.config" ]]; then
+        if [[ -L "$HOME/.config" ]]; then
+            echo -e "${YELLOW}Found existing .config symlink, removing it to prevent conflicts${NC}"
+            local old_target=$(readlink "$HOME/.config")
+            echo -e "${BLUE}  Old .config pointed to: $old_target${NC}"
+            rm "$HOME/.config"
+            
+            # If the old target had actual content, back it up
+            if [[ -d "$old_target" && -n "$(ls -A "$old_target" 2>/dev/null)" ]]; then
+                echo -e "${YELLOW}  Backing up content from old .config location${NC}"
+                mkdir -p "$HOME/.dotfiles-emergency-backup-$(date +%s)"
+                cp -r "$old_target" "$HOME/.dotfiles-emergency-backup-$(date +%s)/.config-from-$(basename "$(dirname "$old_target")")"
+            fi
+        elif [[ -d "$HOME/.config" ]]; then
+            # Check if this package would create .config as a TOP-LEVEL symlink
+            # Only move existing .config if package has .config with no subdirectories
+            # (which indicates it's trying to own the entire .config directory)
+            if [[ -d "$STOW_DIR/$package/.config" ]]; then
+                # Check if package .config has subdirectories (normal case)
+                local config_subdirs=$(find "$STOW_DIR/$package/.config" -maxdepth 1 -type d | wc -l)
+                if [[ $config_subdirs -le 1 ]]; then
+                    # Package .config has no subdirectories - it's trying to own entire .config
+                    echo -e "${YELLOW}Package $package needs entire .config, but regular directory already exists${NC}"
+                    echo -e "${YELLOW}Moving existing .config to backup${NC}"
+                    mkdir -p "$HOME/.dotfiles-emergency-backup-$(date +%s)"
+                    mv "$HOME/.config" "$HOME/.dotfiles-emergency-backup-$(date +%s)/.config"
+                else
+                    # Package .config has subdirectories - normal case, stow will merge
+                    echo -e "${BLUE}Package $package will merge with existing .config directory${NC}"
+                fi
+            fi
+        fi
+    fi
+}
+
 # Stow a package
 stow_package() {
     local package="$1"
@@ -178,7 +238,30 @@ stow_package() {
     
     echo -e "${BLUE}$action_text package: $package${NC}"
     
-    if (cd "$STOW_DIR" && $stow_cmd -t "$HOME" "$package" 2>&1); then
+    # Clean up any potential conflicts first
+    cleanup_stow_conflicts "$package"
+    
+    # Ensure STOW_DIR is absolutely absolute by resolving it one more time
+    local ABSOLUTE_STOW_DIR
+    if [[ "$STOW_DIR" = /* ]]; then
+        # Already absolute
+        ABSOLUTE_STOW_DIR="$STOW_DIR"
+    else
+        # Make it absolute relative to current directory
+        ABSOLUTE_STOW_DIR="$(cd "$STOW_DIR" && pwd)"
+    fi
+    
+    # Use parent directory approach to avoid path resolution issues
+    local STOW_PARENT_DIR=$(dirname "$ABSOLUTE_STOW_DIR")
+    local STOW_DIR_NAME=$(basename "$ABSOLUTE_STOW_DIR")
+    
+    # Use the parent directory approach
+    local stow_success=false
+    if (cd "$STOW_PARENT_DIR" && $stow_cmd -d "$STOW_DIR_NAME" -t "$HOME" "$package") 2>&1; then
+        stow_success=true
+    fi
+    
+    if [ "$stow_success" = true ]; then
         if [ "$dry_run" = "false" ] && [ "$action" = "stow" ]; then
             echo -e "${GREEN}✓ Package '$package' $past_text successfully${NC}"
             convert_to_absolute_symlinks "$package"
