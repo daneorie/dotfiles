@@ -193,7 +193,7 @@ resolve_packages() {
 	printf '%s\n' "${resolved_packages[@]}" | sort -u | tr '\n' ' '
 }
 
-# Get all files from specified packages
+# Get all files and directories from specified packages that might conflict
 get_package_files() {
 	local packages="$1"
 	local all_files=()
@@ -204,20 +204,50 @@ get_package_files() {
 	
 	for package in $packages; do
 		if [[ -d "$PACKAGES_DIR/$package" ]]; then
-			# Find all files in the package, removing the package prefix
+			# Find all files that stow will create
 			while IFS= read -r -d '' file; do
-				# Remove the package directory prefix to get the relative path
 				local relative_path="${file#$PACKAGES_DIR/$package/}"
-				# Skip if it's just the package directory itself
 				if [[ "$relative_path" != "$file" && "$relative_path" != "." ]]; then
 					all_files+=("$relative_path")
 				fi
 			done < <(find "$PACKAGES_DIR/$package" -type f -print0)
+			
+			# Find directories that would conflict - only leaf directories that stow will link
+			# For yazi case: .config/yazi (not .config itself since stow can descend into existing dirs)
+			while IFS= read -r -d '' dir; do
+				local relative_path="${dir#$PACKAGES_DIR/$package/}"
+				if [[ "$relative_path" != "$dir" && "$relative_path" != "." ]]; then
+					# Check if this directory would be linked by stow (contains files or no subdirs)
+					local full_dir="$PACKAGES_DIR/$package/$relative_path"
+					if [[ -n "$(find "$full_dir" -maxdepth 1 -type f 2>/dev/null)" ]] || \
+					   [[ -z "$(find "$full_dir" -mindepth 1 -type d 2>/dev/null)" ]]; then
+						# This directory contains files or has no subdirs, stow will try to link it
+						local target="$HOME/$relative_path"
+						if [[ -e "$target" || -L "$target" ]]; then
+							all_files+=("$relative_path")
+						fi
+					fi
+				fi
+			done < <(find "$PACKAGES_DIR/$package" -type d -print0)
 		fi
 	done
 	
 	# Remove duplicates and sort
 	printf '%s\n' "${all_files[@]}" | sort -u
+}
+
+# Check if a symlink points to old dotfiles structure
+is_old_dotfiles_symlink() {
+	local target="$1"
+	
+	if [[ -L "$target" ]]; then
+		local link_target=$(readlink "$target")
+		# Check if it points to old dotfiles structure (not stow-packages)
+		if [[ "$link_target" == */dotfiles/* && "$link_target" != */stow-packages/* ]]; then
+			return 0
+		fi
+	fi
+	return 1
 }
 
 # Function to backup and remove existing files/symlinks
@@ -227,15 +257,36 @@ backup_existing() {
 
 	if [[ -e "$target" || -L "$target" ]]; then
 		if [[ "$DRY_RUN" == "true" ]]; then
-			echo "Would backup: $file"
+			if is_old_dotfiles_symlink "$target"; then
+				echo "Would remove conflicting old dotfiles symlink: $file"
+			else
+				echo "Would backup: $file"
+			fi
 		else
-			echo -e "${YELLOW}Backing up existing: $file${NC}"
+			# Check if this is an old dotfiles symlink that conflicts with stow
+			if is_old_dotfiles_symlink "$target"; then
+				echo -e "${YELLOW}Removing conflicting old dotfiles symlink: $file${NC}"
+				local link_target=$(readlink "$target")
+				echo -e "${BLUE}  Old symlink pointed to: $link_target${NC}"
+				
+				# If the old symlink target contains actual files, back them up
+				if [[ -d "$link_target" ]] && [[ -n "$(ls -A "$link_target" 2>/dev/null)" ]]; then
+					echo -e "${YELLOW}  Backing up files from old location: $link_target${NC}"
+					mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+					cp -r "$link_target" "$BACKUP_DIR/$file-old-location"
+				fi
+				
+				# Remove the conflicting symlink
+				rm "$target"
+			else
+				echo -e "${YELLOW}Backing up existing: $file${NC}"
 
-			# Create backup directory if it doesn't exist
-			mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+				# Create backup directory if it doesn't exist
+				mkdir -p "$BACKUP_DIR/$(dirname "$file")"
 
-			# Move the existing file/symlink to backup
-			mv "$target" "$BACKUP_DIR/$file"
+				# Move the existing file/symlink to backup
+				mv "$target" "$BACKUP_DIR/$file"
+			fi
 		fi
 		return 0
 	fi
