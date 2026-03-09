@@ -1,0 +1,224 @@
+{
+    ;; !  | means mandatory -   modifier(s) alone when pressend change behavior
+    ;; #  | means optional  -   modifiers are optional (but atleast one necessary)
+
+    ;; :!Ca is keycode :a and prefix a with !C
+
+    ;; C  | left_command
+    ;; T  | left_control
+    ;; O  | left_option
+    ;; S  | left_shift
+    ;; F  | fn
+    ;; Q  | right_command
+    ;; W  | right_control
+    ;; E  | right_option
+    ;; R  | right_shift
+
+    ;; ## | optional any
+    ;; !! | command + control + optional + shift (hyper)
+
+    ;; Install via brew: `brew install yqrashawn/goku/goku`
+
+    ;; karabiner docs: ;; https://pqrs.org/osx/karabiner/json.html#complex_modifications-manipulator-definition
+    ;; <other options> includs ~to_if_alone~, ~to_if_held_down~,~to_after_key_up~, ~to_delayed_action~ and ~parameters~.
+
+    ;; (custom variables) & modifiers -> Advanced
+    ;; https://github.com/yqrashawn/GokuRakuJoudo/blob/master/examples.org#custom-variable
+
+    ;; Examples: https://github.com/yqrashawn/GokuRakuJoudo/blob/master/examples.org
+    ;; https://gist.github.com/kaushikgopal/ff7a92bbc887e59699c804b59074a126
+    ;; https://github.com/kchen0x/k-goku/blob/master/karabiner.edn
+
+:profiles {
+    :Default { :default true
+        :sim     50     ;; simultaneous_threshold_milliseconds (def: 50)
+                        ;; keys need to be pressed within this threshold to be considered simultaneous
+        :delay   300    ;; to_delayed_action_delay_milliseconds (def: 500)
+                        ;; basically it means time after which the key press is count delayed
+        :alone   1000    ;; to_if_alone_timeout_milliseconds (def: 1000)
+                        ;; hold for 995s and single tap registered; hold for 1005s and seen as modifier
+        :held    500    ;; to_if_held_down_threshold_milliseconds (def: 500)
+                        ;; key is fired twice when 500 ms is elapsed (otherwise seen as a hold command)
+    }
+} ;; profile
+
+:applications {
+    :league [
+        "^com\\.riotgames\\.LeagueofLegends\\.GameClient$" ;; League of Legends.app/Contents/LoL/Game/League Of Legends.app
+    ]
+} ;; applications
+
+:input-sources {
+    :ja {:language "ja"}
+    :en {:language "en"}
+}
+
+
+:templates {
+    :open "open -a '%s'"                                ;; :open "Safari"
+    :openApp "open \"%s\""                              ;; :open "/Applications/Safari.app"
+    :openFinder "open \"/System/Library/CoreServices/Finder.app\"" ;; "openFinder" to switch to the Finder
+    :screen_capture_clipboard "screencapture -ixc"      ;; Capture screen interactive and silent to clipboard
+    :screen_capture_preview "screencapture -ixP"        ;; Capture screen interactive and silent to Preview.
+                                                        ;; Note: Allow 'karabiner_console_user_server'
+                                                        ;; to record the screen in 'System Preferences' /
+                                                        ;; 'Security & Privacy' / 'Privacy' / 'Screen Recording'.
+    :applescript "osascript '~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/%s'"
+                                                        ;; Full path to user's 'iCloud Drive/Script Editor'
+                                                        ;; You can't use '~' for the users home directory
+    :notification "osascript -e 'display notification \"%s\" with title \"%s\"'"
+                                                        ;; Display notification
+                                                        ;; notifcation "text" "title"
+    :type "osascript -e 'tell application \"System Events\" to keystroke \"%s\" as text'"
+    :snippet "cat '~/Library/Mobile Documents/com~apple~CloudDocs/Snippets/%s' | pbcopy -pboard general"
+    :beep "osascript -e 'beep'"                         ;; Play default beep
+    :purr "afplay /System/Library/Sounds/Purr.aiff"     ;; Play the Purr sound
+    :tink "afplay /System/Library/Sounds/Tink.aiff"     ;; Play the Tink sound
+} ;; templates
+
+:layers {
+    :space-mode {:key :spacebar :condi :!league :alone {:key :spacebar}}
+} ;; layers
+
+;:simlayer-threshold 500 ;; (def: 250)
+;:simlayers {
+    ;:space-mode {:key :spacebar :condi :!league}
+;} ;; simlayers
+
+:main [
+    ;;
+    ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
+    ;; | ` |F1 |F2 |F3 |F4 |F5 |F6 |F7 |F8 |F9 |F10|F11|F12| caps|  ;; |   |F1 |F2 |F3 |F4 |F5 |F6 |F7 |F8 |F9 |F10|F11|F12|     |  ;;   `  F1  F2  F3  F4  F5  F6  F7  F8  F9  F10 F11 F12  caps
+    ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
+    ;; |esc  | ! | @ | { | } | | | % | 7 | 8 | 9 | * | [ | ] | \ |  ;; |esc  | ! | @ | { | } | | | % | 7 | 8 | 9 | * |   |   |   |  ;;  esc    !   @   {   }   |   %   7   8   9   *   [   ]   \
+    ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
+    ;; |delete| = | $ | ( | ) | ` | & | 4 | 5 | 6 | - | ' | enter|  ;; |      | = | $ | ( | ) | ` | & | 4 | 5 | 6 | - |   |      |  ;;  delete  =   $   (   )   `   &   4   5   6   -   '   enter
+    ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
+    ;; |shift   | # | ^ | [ | ] | , |sp.| 1 | 2 | 3 | \ |   shift|  ;; |        | # | ^ | [ | ] | , |sp.| 1 | 2 | 3 | \ |        |  ;;  shift     #   ^   [   ]   ,  sp.  1   2   3   \     shift
+    ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
+    ;; |fn|ctrl|opt|cmd |       space       | 0  |meh|     arrows|  ;; |  |    |   |    |       space       | 0  |   |           |  ;;  fn ctrl opt cmd         space         0   meh      arrows
+    ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
+    ;;
+    ;; http://www.keyboard-layout-editor.com/##@@=~%0A%60&=!%0A1%0A%0AF1&=%2F@%0A2%0A%0AF2&=%23%0A3%0A%0AF3&=$%0A4%0A%0AF4&=%25%0A5%0A%0AF5&=%5E%0A6%0A%0AF6&=%2F&%0A7%0A%0AF7&=*%0A8%0A%0AF8&=(%0A9%0A%0AF9&=)%0A0%0A%0AF10&=%2F_%0A-%0A%0AF11&=+%0A%2F=%0A%0AF12&_w:2%3B&=Caps%20Lock%3B&@_w:1.5%3B&=Tab%0A%0A%0AEscape&=Q%0A%0A%0A!&=W%0A%0A%0A%2F@&=F%0A%0A%0A%7B&=P%0A%0A%0A%7D&=G%0A%0A%0A%7C&=J%0A%0A%0A%25&=L%0A%0A%0A7&=U%0A%0A%0A8&=Y%0A%0A%0A9&=%2F%3B%0A%2F:%0A%0A*&=%7B%0A%5B&=%7D%0A%5D&_w:1.5%3B&=%7C%0A%5C%3B&@_w:1.75%3B&=Backspace&=A%0A%0A%0A%2F=&=R%0A%0A%0A$&=S%0A%0A%0A(&=T%0A%0A%0A)&=D%0A%0A%0A%60&=H%0A%0A%0A%2F&&=N%0A%0A%0A4&=E%0A%0A%0A5&=I%0A%0A%0A6&=O%0A%0A%0A-&=%22%0A'&_w:2.25%3B&=Enter%3B&@_w:2.25%3B&=Shift%0A(&=Z%0A%0A%0A%23&=X%0A%0A%0A%5E&=C%0A%0A%0A%5B&=V%0A%0A%0A%5D&=B%0A%0A%0A,&=K&=M%0A%0A%0A1&=%3C%0A,%0A%0A2&=%3E%0A.%0A%0A3&=%3F%0A%2F%2F%0A%0A%5C&_w:2.75%3B&=Shift%0A)%3B&@_w:1.25%3B&=Ctrl&_w:1.25%3B&=Option&_w:1.25%3B&=Command&_a:7&w:6.25%3B&=&_a:4&w:1.25%3B&=Hyper%0A%0A%0A0&_w:1.25%3B&=Meh&_a:7&w:1.25%3B&=&_w:1.25%3B&=
+    ;;
+
+    {:des "SpaceFN: Space+<key> to match Moonlander Symbol-layer setup (https://configure.zsa.io/moonlander/layouts/BPZEx/latest/1)"
+     :rules [:space-mode
+        ;; this is defined before Colemak due to limitations, so I'll note the Colemak keys
+        ;[:##grave_accent_and_tilde :grave_accent_and_tilde]    ;; `     -> `
+        [:##1 :f1]                                             ;; 1     -> F1
+        [:##2 :f2]                                             ;; 2     -> F2
+        [:##3 :f3]                                             ;; 3     -> F3
+        [:##4 :f4]                                             ;; 4     -> F4
+        [:##5 :f5]                                             ;; 5     -> F5
+        [:##6 :f6]                                             ;; 6     -> F6
+        [:##7 :f7]                                             ;; 7     -> F7
+        [:##8 :f8]                                             ;; 8     -> F8
+        [:##9 :f9]                                             ;; 9     -> F9
+        [:##0 :f10]                                            ;; 0     -> F10
+        [:##hyphen :f11]                                       ;; -     -> F11
+        [:##equal_sign :f12]                                   ;; =     -> F12
+        ;[:##delete_or_backspace :delete_or_backspace]          ;; BS    -> BS
+        [:##tab :escape]                                       ;; TAB   -> ESCAPE
+        [:##q :!S1]                                            ;; q     -> !
+        [:##w :!S2]                                            ;; w     -> @
+        [:##e :!Sopen_bracket]                                 ;; f     -> {
+        [:##r :!Sclose_bracket]                                ;; p     -> }
+        [:##t :!Sbackslash]                                    ;; g     -> |
+        [:##y :!S5]                                            ;; j     -> %
+        [:##u :7]                                              ;; l     -> 7
+        [:##i :8]                                              ;; u     -> 8
+        [:##o :9]                                              ;; y     -> 9
+        [:##p :!S8]                                            ;; ;     -> *
+        ;[:##open_bracket :open_bracket                        ;; [     -> [
+        ;[:##close_bracket :close_bracket                      ;; ]     -> ]
+        ;[:##backslack :backslash]                              ;; \     -> \
+        [:##caps_lock :!Odelete_or_backspace]                   ;; CAPS  -> DTWRD
+        [:##a :equal_sign]                                     ;; a     -> =
+        [:##s :!S4]                                            ;; r     -> $
+        [:##d :!S9]                                            ;; s     -> (
+        [:##f :!S0]                                            ;; t     -> )
+        [:##g :grave_accent_and_tilde]                         ;; d     -> `
+        [:##h :!S7]                                            ;; h     -> &
+        [:##j :4]                                              ;; n     -> 4
+        [:##k :5]                                              ;; e     -> 5
+        [:##l :6]                                              ;; i     -> 6
+        [:##semicolon :hyphen]                                 ;; o     -> -
+        ;[:##apostrophe :apostrophe]                            ;; '     -> '
+        ;[:##return_or_enter :return_or_enter]                  ;; RET   -> RET
+        ;[:##left_shift :left_shift]                            ;; LSHFT -> LSHFT
+        [:##z :!S3]                                            ;; z     -> #
+        [:##x :!S6]                                            ;; x     -> ^
+        [:##c :open_bracket]                                   ;; c     -> [
+        [:##v :close_bracket]                                  ;; v     -> ]
+        [:##b :comma]                                          ;; b     -> ,
+        [:##n :spacebar]                                       ;; k     -> SPACE
+        [:##m :1]                                              ;; m     -> 1
+        [:##comma :2]                                          ;; ,     -> 2
+        [:##period :3]                                         ;; .     -> 3
+        [:##slash :backslash]                                  ;; /     -> \
+        ;[:##right_shift :right_shift]                          ;; RSHFT -> RSHFT
+        ;[:##fn :fn]                                            ;; FN    -> FN
+        ;[:##left_control :left_control]                        ;; LCTRL -> LCTRL
+        ;[:##left_option :left_option]                          ;; LOPT  -> LOPT
+        ;[:##left_command :left_command]                        ;; LCMD  -> LCMD
+        ;[:##space :space]                                      ;; SPACE -> SPACE
+        [:##right_command :0]                                  ;; RCMD  -> 0
+        ;[:##right_option :right_option]                        ;; ROPT  -> ROPT
+        ;[:##right_control :right_control]                      ;; RCTRL -> RCTRL
+        ;[:##up_arrow :up_arrow]                                ;; UP    -> UP
+        ;[:##down_arrow :down_arrow]                            ;; DOWN  -> DOWN
+        ;[:##left_arrow :left_arrow]                            ;; LEFT  -> LEFT
+        ;[:##right_arrow :right_arrow]                          ;; RIGHT -> RIGHT
+     ]
+    }
+
+    {:des "Colemak Layout - Letters"
+     :rules [:en
+        [:##e :f]
+        [:##r :p]
+        [:##t :g]
+        [:##y :j]
+        [:##u :l]
+        [:##i :u]
+        [:##o :y]
+        [:##p :semicolon]
+        [:##s :r]
+        [:##d :s]
+        [:##f :t]
+        [:##g :d]
+        [:##j :n]
+        [:##k :e]
+        [:##l :i]
+        [:##semicolon :o]
+        [:##n :k]
+      ]
+    }
+    {:des "Swap Backspace and Caps Lock"
+     :rules [
+        [:##caps_lock :delete_or_backspace]
+        [:##delete_or_backspace :caps_lock]
+      ]
+    }
+
+    {:des "Right Command Key -> Hyper Key"
+     :rules [
+        [:right_command :!CTOleft_shift]
+     ]
+    }
+    {:des "Right Option Key -> Meh Key"
+     :rules [
+        [:right_option :!TOleft_shift]
+     ]
+    }
+
+    {:des "Fn+Arrows: Volume Control"
+     :rules [
+        [:!Fup_arrow :volume_increment]
+        [:!Fdown_arrow :volume_decrement]
+        [:!Fleft_arrow :mute]
+        ;[:Fright_arrow :volume_down]
+     ]
+   }
+] ;; main
+} ;; EOF

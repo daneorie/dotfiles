@@ -53,6 +53,7 @@ BREW_CORE_PACKAGES=(
     "neovim"                # Text editor
     "tmux"                  # Terminal multiplexer
     "zsh"                   # Shell
+	"antigen"               # Shell plugins
     
     # Development tools
     "jq"                    # JSON processor

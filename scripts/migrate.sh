@@ -310,10 +310,16 @@ backup_existing() {
 					# Remove the conflicting symlink
 					rm "$target"
 				else
-					# Handle regular directory that conflicts with stow
-					echo -e "${YELLOW}Backing up conflicting directory: $file${NC}"
-					mkdir -p "$BACKUP_DIR/$(dirname "$file")"
-					mv "$target" "$BACKUP_DIR/$file"
+					# Special handling for .config directory - don't backup if it can be safely merged
+					if [[ "$file" == ".config" && -d "$target" ]]; then
+						echo -e "${BLUE}.config directory exists - will be preserved and merged during package installation${NC}"
+						return 1  # Don't backup
+					else
+						# Handle regular directory that conflicts with stow
+						echo -e "${YELLOW}Backing up conflicting directory: $file${NC}"
+						mkdir -p "$BACKUP_DIR/$(dirname "$file")"
+						mv "$target" "$BACKUP_DIR/$file"
+					fi
 				fi
 			else
 				echo -e "${YELLOW}Backing up existing: $file${NC}"
@@ -460,7 +466,7 @@ perform_migration() {
 					rm "$HOME/.config"
 				elif [[ -d "$HOME/.config" ]]; then
 					echo -e "${BLUE}Found existing .config directory - packages will merge safely${NC}"
-					echo -e "${BLUE}Each package will only manage its own subdirectory within .config${NC}"
+					echo -e "${BLUE}Each package will manage its own files/subdirectories within .config${NC}"
 					# Note: Individual packages will handle their own .config conflicts during installation
 				fi
 			fi

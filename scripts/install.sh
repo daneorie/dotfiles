@@ -185,17 +185,23 @@ cleanup_stow_conflicts() {
             # Only move existing .config if package has .config with no subdirectories
             # (which indicates it's trying to own the entire .config directory)
             if [[ -d "$STOW_DIR/$package/.config" ]]; then
-                # Check if package .config has subdirectories (normal case)
+                # Check if package .config has content (subdirectories or files)
                 local config_subdirs=$(find "$STOW_DIR/$package/.config" -maxdepth 1 -type d | wc -l)
-                if [[ $config_subdirs -le 1 ]]; then
-                    # Package .config has no subdirectories - it's trying to own entire .config
-                    echo -e "${YELLOW}Package $package needs entire .config, but regular directory already exists${NC}"
+                local config_files=$(find "$STOW_DIR/$package/.config" -maxdepth 1 -type f | wc -l)
+                
+                if [[ $config_subdirs -le 1 && $config_files -eq 0 ]]; then
+                    # Package .config is empty - dangerous, would create symlink to empty directory
+                    echo -e "${YELLOW}Package $package has empty .config directory - this would overwrite existing .config${NC}"
                     echo -e "${YELLOW}Moving existing .config to backup${NC}"
                     mkdir -p "$HOME/.dotfiles-emergency-backup-$(date +%s)"
                     mv "$HOME/.config" "$HOME/.dotfiles-emergency-backup-$(date +%s)/.config"
                 else
-                    # Package .config has subdirectories - normal case, stow will merge
-                    echo -e "${BLUE}Package $package will merge with existing .config directory${NC}"
+                    # Package .config has content (subdirectories or files) - safe to merge
+                    if [[ $config_subdirs -gt 1 ]]; then
+                        echo -e "${BLUE}Package $package will merge subdirectories with existing .config directory${NC}"
+                    else
+                        echo -e "${BLUE}Package $package will merge files with existing .config directory${NC}"
+                    fi
                 fi
             fi
         fi

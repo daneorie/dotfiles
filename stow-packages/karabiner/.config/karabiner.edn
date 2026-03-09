@@ -1,3 +1,91 @@
+{
+    ;; !  | means mandatory -   modifier(s) alone when pressend change behavior
+    ;; #  | means optional  -   modifiers are optional (but atleast one necessary)
+
+    ;; :!Ca is keycode :a and prefix a with !C
+
+    ;; C  | left_command
+    ;; T  | left_control
+    ;; O  | left_option
+    ;; S  | left_shift
+    ;; F  | fn
+    ;; Q  | right_command
+    ;; W  | right_control
+    ;; E  | right_option
+    ;; R  | right_shift
+
+    ;; ## | optional any
+    ;; !! | command + control + optional + shift (hyper)
+
+    ;; Install via brew: `brew install yqrashawn/goku/goku`
+
+    ;; karabiner docs: ;; https://pqrs.org/osx/karabiner/json.html#complex_modifications-manipulator-definition
+    ;; <other options> includs ~to_if_alone~, ~to_if_held_down~,~to_after_key_up~, ~to_delayed_action~ and ~parameters~.
+
+    ;; (custom variables) & modifiers -> Advanced
+    ;; https://github.com/yqrashawn/GokuRakuJoudo/blob/master/examples.org#custom-variable
+
+    ;; Examples: https://github.com/yqrashawn/GokuRakuJoudo/blob/master/examples.org
+    ;; https://gist.github.com/kaushikgopal/ff7a92bbc887e59699c804b59074a126
+    ;; https://github.com/kchen0x/k-goku/blob/master/karabiner.edn
+
+:profiles {
+    :Default { :default true
+        :sim     50     ;; simultaneous_threshold_milliseconds (def: 50)
+                        ;; keys need to be pressed within this threshold to be considered simultaneous
+        :delay   300    ;; to_delayed_action_delay_milliseconds (def: 500)
+                        ;; basically it means time after which the key press is count delayed
+        :alone   1000    ;; to_if_alone_timeout_milliseconds (def: 1000)
+                        ;; hold for 995s and single tap registered; hold for 1005s and seen as modifier
+        :held    500    ;; to_if_held_down_threshold_milliseconds (def: 500)
+                        ;; key is fired twice when 500 ms is elapsed (otherwise seen as a hold command)
+    }
+} ;; profile
+
+:applications {
+    :league [
+        "^com\\.riotgames\\.LeagueofLegends\\.GameClient$" ;; League of Legends.app/Contents/LoL/Game/League Of Legends.app
+    ]
+} ;; applications
+
+:input-sources {
+    :ja {:language "ja"}
+    :en {:language "en"}
+}
+
+
+:templates {
+    :open "open -a '%s'"                                ;; :open "Safari"
+    :openApp "open \"%s\""                              ;; :open "/Applications/Safari.app"
+    :openFinder "open \"/System/Library/CoreServices/Finder.app\"" ;; "openFinder" to switch to the Finder
+    :screen_capture_clipboard "screencapture -ixc"      ;; Capture screen interactive and silent to clipboard
+    :screen_capture_preview "screencapture -ixP"        ;; Capture screen interactive and silent to Preview.
+                                                        ;; Note: Allow 'karabiner_console_user_server'
+                                                        ;; to record the screen in 'System Preferences' /
+                                                        ;; 'Security & Privacy' / 'Privacy' / 'Screen Recording'.
+    :applescript "osascript '~/Library/Mobile Documents/com~apple~ScriptEditor2/Documents/%s'"
+                                                        ;; Full path to user's 'iCloud Drive/Script Editor'
+                                                        ;; You can't use '~' for the users home directory
+    :notification "osascript -e 'display notification \"%s\" with title \"%s\"'"
+                                                        ;; Display notification
+                                                        ;; notifcation "text" "title"
+    :type "osascript -e 'tell application \"System Events\" to keystroke \"%s\" as text'"
+    :snippet "cat '~/Library/Mobile Documents/com~apple~CloudDocs/Snippets/%s' | pbcopy -pboard general"
+    :beep "osascript -e 'beep'"                         ;; Play default beep
+    :purr "afplay /System/Library/Sounds/Purr.aiff"     ;; Play the Purr sound
+    :tink "afplay /System/Library/Sounds/Tink.aiff"     ;; Play the Tink sound
+} ;; templates
+
+:layers {
+    :space-mode {:key :spacebar :condi :!league :alone {:key :spacebar}}
+} ;; layers
+
+;:simlayer-threshold 500 ;; (def: 250)
+;:simlayers {
+    ;:space-mode {:key :spacebar :condi :!league}
+;} ;; simlayers
+
+:main [
     ;;
     ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;; –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––  ;;
     ;; | ` |F1 |F2 |F3 |F4 |F5 |F6 |F7 |F8 |F9 |F10|F11|F12| caps|  ;; |   |F1 |F2 |F3 |F4 |F5 |F6 |F7 |F8 |F9 |F10|F11|F12|     |  ;;   `  F1  F2  F3  F4  F5  F6  F7  F8  F9  F10 F11 F12  caps
@@ -84,3 +172,53 @@
         ;[:##right_arrow :right_arrow]                          ;; RIGHT -> RIGHT
      ]
     }
+
+    {:des "Colemak Layout - Letters"
+     :rules [:en
+        [:##e :f]
+        [:##r :p]
+        [:##t :g]
+        [:##y :j]
+        [:##u :l]
+        [:##i :u]
+        [:##o :y]
+        [:##p :semicolon]
+        [:##s :r]
+        [:##d :s]
+        [:##f :t]
+        [:##g :d]
+        [:##j :n]
+        [:##k :e]
+        [:##l :i]
+        [:##semicolon :o]
+        [:##n :k]
+      ]
+    }
+    {:des "Swap Backspace and Caps Lock"
+     :rules [
+        [:##caps_lock :delete_or_backspace]
+        [:##delete_or_backspace :caps_lock]
+      ]
+    }
+
+    {:des "Right Command Key -> Hyper Key"
+     :rules [
+        [:right_command :!CTOleft_shift]
+     ]
+    }
+    {:des "Right Option Key -> Meh Key"
+     :rules [
+        [:right_option :!TOleft_shift]
+     ]
+    }
+
+    {:des "Fn+Arrows: Volume Control"
+     :rules [
+        [:!Fup_arrow :volume_increment]
+        [:!Fdown_arrow :volume_decrement]
+        [:!Fleft_arrow :mute]
+        ;[:Fright_arrow :volume_down]
+     ]
+   }
+] ;; main
+} ;; EOF
