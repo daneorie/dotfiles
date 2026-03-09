@@ -1,7 +1,7 @@
 -- WezTerm Key Tables Configuration
 local wezterm = require("wezterm")
 local act = wezterm.action
-local utils = require("wezterm.utils")
+local utils = require("utils")
 
 local function setup_key_tables(config)
 	config.key_tables = {
@@ -153,4 +153,3 @@ end
 return {
 	setup_key_tables = setup_key_tables,
 }
-

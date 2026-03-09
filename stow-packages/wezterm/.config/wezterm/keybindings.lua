@@ -1,9 +1,9 @@
 -- WezTerm Keybindings Configuration
 local wezterm = require("wezterm")
 local act = wezterm.action
-local utils = require("wezterm.utils")
-local neovim = require("wezterm.neovim")
-local workspace = require("wezterm.workspace")
+local utils = require("utils")
+local neovim = require("neovim")
+local workspace = require("workspace")
 
 local function setup_keybindings(config)
 	local SUPER, META = utils.get_platform_config()

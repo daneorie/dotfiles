@@ -5,6 +5,67 @@ services:
     build: 
       context: ..
       dockerfile: docker/Dockerfile
+    container_name: dotfiles-complete-test
+    volumes:
+      # Mount the entire dotfiles directory (read-only for safety)
+      - ..:/home/testuser/dotfiles:ro
+    working_dir: /home/testuser
+    environment:
+      - TERM=xterm-256color
+      - HOME=/home/testuser
+      - USER=testuser
+      - PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew
+      - HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar
+      - HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew
+    # Keep container running for interactive testing
+    tty: true
+    stdin_open: true
+    # Override the default command to set up the working copy
+    command: >
+      bash -c "
+        echo 'Setting up complete dotfiles testing environment...' &&
+        echo 'Creating working directory...' &&
+        mkdir -p dotfiles-work &&
+        echo 'Copying dotfiles repository...' &&
+        cd /home/testuser &&
+        cp -r dotfiles/* dotfiles-work/ &&
+        cp dotfiles/.gitignore dotfiles-work/ 2>/dev/null || true &&
+        echo 'Setting script permissions...' &&
+        cd dotfiles-work &&
+        chmod +x scripts/*.sh &&
+        chmod +x justfile 2>/dev/null || true &&
+        echo 'Setup verification:' &&
+        echo '  Scripts present:' && ls -la scripts/*.sh | wc -l &&
+        echo '  Stow packages:' && ls stow-packages/ | wc -l &&
+        echo '' &&
+        echo 'Complete dotfiles testing environment ready!' &&
+        echo '' &&
+        echo 'Available test commands:' &&
+        echo '  make complete-setup --dry-run     # Test complete setup (dry run)' &&
+        echo '  make complete-setup               # Run complete setup' &&
+        echo '  make complete-setup-verbose       # Run with verbose output' &&
+        echo '  make test                         # Run comprehensive test suite' &&
+        echo '  make health                       # Health check' &&
+        echo '  make status                       # Show status' &&
+        echo '' &&
+        echo 'Testing complete setup process (dry run simulation)...' &&
+        echo '' &&
+        ./scripts/complete-setup.sh --help &&
+        echo '' &&
+        echo 'Running basic verification...' &&
+        make verify &&
+        echo '' &&
+        echo 'Environment ready! To test complete setup:' &&
+        echo '  cd dotfiles-work' &&
+        echo '  make complete-setup' &&
+        exec /bin/zsh
+      "
+
+  dotfiles-stow-test:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: dotfiles-stow-test
     volumes:
       # Mount the entire dotfiles directory (read-only for safety)
@@ -17,33 +78,34 @@ services:
     # Keep container running for interactive testing
     tty: true
     stdin_open: true
-    # Override the default command to set up the working copy
+    # Override the default command to set up the working copy for stow-only testing
     command: >
       bash -c "
-        echo 'Setting up dotfiles testing environment...' &&
+        echo 'Setting up stow-only dotfiles testing environment...' &&
         echo 'Creating working directory...' &&
-        mkdir -p dotfiles-work &&
+        mkdir -p dotfiles-work/scripts &&
         echo 'Copying stow management files...' &&
         cd /home/testuser &&
-        cp dotfiles/scripts/install.sh dotfiles-work/ &&
-        cp dotfiles/scripts/migrate.sh dotfiles-work/ &&
-        cp dotfiles/scripts/verify.sh dotfiles-work/ &&
-        cp dotfiles/scripts/test-stow.sh dotfiles-work/ &&
+        cp dotfiles/scripts/install.sh dotfiles-work/scripts/ &&
+        cp dotfiles/scripts/migrate.sh dotfiles-work/scripts/ &&
+        cp dotfiles/scripts/verify.sh dotfiles-work/scripts/ &&
+        cp dotfiles/scripts/test-stow.sh dotfiles-work/scripts/ &&
+        cp dotfiles/justfile dotfiles-work/ &&
         cp -r dotfiles/stow-packages dotfiles-work/ &&
         echo 'Setting script permissions...' &&
-        cd dotfiles-work &&
+        cd dotfiles-work/scripts &&
         chmod +x *.sh &&
         echo 'Setup verification:' &&
         echo '  Scripts present:' && ls -la *.sh | wc -l &&
         echo '  Stow packages:' && ls stow-packages/ | wc -l &&
         echo '' &&
-        echo 'Dotfiles testing environment ready!' &&
+        echo 'Stow-only dotfiles testing environment ready!' &&
         echo 'Available commands:' &&
-        echo '  ./install.sh --list      # List packages' &&
-        echo '  ./install.sh --dry-run --core  # Test core installation' &&
-        echo '  ./migrate.sh             # Test migration' &&
-        echo '  ./verify.sh              # Verify packages' &&
-        echo '  ./test-stow.sh           # Run comprehensive test suite' &&
+        echo '  ./install.sh --list              # List packages' &&
+        echo '  ./install.sh --dry-run --core    # Test core installation' &&
+        echo '  ./migrate.sh                     # Test migration' &&
+        echo '  ./verify.sh                      # Verify packages' &&
+        echo '  ./test-stow.sh                   # Run comprehensive test suite' &&
         echo '' &&
         echo 'Running test suite automatically...' &&
         echo '' &&

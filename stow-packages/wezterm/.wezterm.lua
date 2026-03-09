@@ -31,10 +31,10 @@ local config_dir = get_config_dir()
 package.path = package.path .. ";" .. config_dir .. "/?.lua"
 
 -- Load configuration modules
-local appearance = require("wezterm.appearance")
-local events = require("wezterm.events")
-local keybindings = require("wezterm.keybindings")
-local key_tables = require("wezterm.key_tables")
+local appearance = require("appearance")
+local events = require("events")
+local keybindings = require("keybindings")
+local key_tables = require("key_tables")
 
 -- This table will hold the configuration
 local config = {}

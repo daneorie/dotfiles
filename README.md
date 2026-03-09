@@ -2,27 +2,110 @@
 
 A modular dotfiles configuration managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
-## Quick Start
+## 🚀 Quick Start
 
-1. **Install GNU Stow**
+### One-Command Complete Setup (Recommended)
+
+For the ultimate "just works" experience on a fresh machine:
+
+```bash
+# 1. Clone this repository
+git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# 2. Complete setup - dependencies + stow packages in one command
+make complete-setup        # Core packages (recommended)
+make complete-setup-all     # All packages
+make complete-setup-verbose # With detailed output
+
+# Or use the script directly for more options
+./scripts/complete-setup.sh --help
+```
+
+**What `complete-setup` does:**
+1. **Bootstrap**: Installs package managers (Homebrew, Git, GNU Stow)
+2. **Dependencies**: Installs CLI tools (fzf, fd, neovim, bat, etc.) 
+3. **Version Managers**: Sets up jenv, rbenv, pyenv, nvm, antigen
+4. **Stow Packages**: Installs your dotfiles configuration
+5. **Health Check**: Verifies everything is working
+
+### Migration from Existing Dotfiles
+
+If you have existing dotfiles that need to be backed up first:
+
+```bash
+# Complete setup with automatic migration (recommended)
+make complete-setup-migrate     # Migrate + install core packages
+make complete-setup-migrate-all # Migrate + install all packages
+
+# Or use migration commands directly
+make migrate-core               # Migrate core packages only
+make migrate-all                # Migrate all packages  
+make migrate-dry-run            # Preview what would be migrated
+make migrate-backup-only        # Just backup, no installation
+
+# Migrate specific packages
+./scripts/migrate.sh zsh git tmux --yes  # Migrate specific packages
+just migrate-packages zsh git tmux       # Using just
+
+# Advanced migration options
+./scripts/migrate.sh --help     # See all migration options
+```
+
+**Migration process:**
+1. **Backup**: Creates timestamped backup of existing dotfiles in `~/.dotfiles-backup-TIMESTAMP`
+2. **Install**: Uses GNU Stow to create clean symlinks from packages
+3. **Verify**: Ensures all packages are correctly installed
+
+### Traditional Multi-Step Setup
+
+For more control over the installation process:
+
+```bash
+# Run complete dependency setup first
+make full-setup           # Bootstrap + dependencies + tools + dotfiles
+
+# Or run each step individually:
+make bootstrap           # Install package managers (Homebrew, Git, Stow)
+make install-deps        # Install CLI tools (fzf, fd, neovim, etc.)
+make setup-tools         # Install version managers (jenv, rbenv, pyenv, nvm, antigen)
+make install-core        # Install core dotfiles
+```
+
+### Manual Installation (Advanced)
+
+If you prefer more control or already have some tools installed:
+
+1. **Bootstrap (if needed)**
    ```bash
-   # macOS
-   brew install stow
-   
-   # Ubuntu/Debian
-   sudo apt install stow
-   
-   # Arch Linux
-   sudo pacman -S stow
+   ./scripts/bootstrap.sh    # Installs Homebrew, Git, GNU Stow
    ```
 
-2. **Clone this repository**
+2. **Install Dependencies (optional)**
    ```bash
-   git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
-   cd ~/dotfiles
+   # Install all development tools
+   make install-deps
+   
+   # Or install specific categories
+   make install-deps-core    # Core CLI tools (fzf, fd, neovim, etc.)
+   make install-deps-gui     # GUI applications (alacritty, wezterm, etc.)
+   make install-deps-lang    # Language tools (node, python, ruby, etc.)
    ```
 
-3. **Install packages**
+3. **Setup Version Managers (optional)**
+   ```bash
+   # Install all version managers
+   make setup-tools
+   
+   # Or install specific ones
+   make setup-java          # jenv (Java)
+   make setup-ruby          # rbenv (Ruby)  
+   make setup-python        # pyenv (Python)
+   make setup-node          # nvm (Node.js)
+   make setup-zsh           # antigen (Zsh plugins)
+   ```
+
+4. **Install Dotfiles**
    ```bash
    # Using Make (recommended)
    make install-core           # Install core packages
@@ -39,6 +122,61 @@ A modular dotfiles configuration managed with [GNU Stow](https://www.gnu.org/sof
    ./scripts/install.sh --all
    ./scripts/install.sh zsh git tmux
    ```
+
+### Health Check
+
+Verify everything is working correctly:
+
+```bash
+make health              # Comprehensive system check
+make status              # Show current dotfiles status
+```
+
+## 🛠️ Included Tools & Dependencies
+
+### Package Managers
+- **Homebrew** - Package manager for macOS/Linux
+- **GNU Stow** - Symlink farm manager for dotfiles
+
+### Essential CLI Tools
+- **fd** - Better find command
+- **fzf** - Fuzzy finder for command line
+- **ripgrep** - Better grep command  
+- **bat** - Better cat with syntax highlighting
+- **eza** - Better ls with colors and icons
+- **neovim** - Modern vim-based editor
+- **tmux** - Terminal multiplexer
+- **lazygit** - Terminal UI for git
+- **git-delta** - Better git diff viewer
+- **jq/yq** - JSON/YAML processors
+
+### Development Tools
+- **GitHub CLI** - Official GitHub command line tool
+- **curl/wget** - HTTP clients
+- **rsync** - File synchronization
+- **compression tools** - unzip, p7zip
+
+### Version Managers
+- **jenv** - Java version manager
+- **rbenv** - Ruby version manager  
+- **pyenv** - Python version manager
+- **nvm** - Node.js version manager
+- **antigen** - Zsh plugin manager
+- **rustup** - Rust toolchain manager
+
+### Programming Languages (Optional)
+- **Java** - OpenJDK
+- **Python** - Python 3.11/3.12
+- **Node.js** - JavaScript runtime with yarn
+- **Ruby** - Ruby language
+- **Go** - Go programming language
+- **Rust** - Rust programming language
+- **Lua** - Lua with LuaRocks
+
+### GUI Applications (macOS)
+- **Alacritty** - GPU-accelerated terminal
+- **WezTerm** - GPU-accelerated terminal
+- **Kitty** - Fast terminal emulator
 
 ## Package Structure
 
@@ -73,35 +211,57 @@ This repository is organized into modular packages that can be installed indepen
 ## Usage Examples
 
 ```bash
-# Task runners (recommended)
-make list                    # List all available packages
-make dry-run                 # Preview core installation
-make install-core            # Install core packages
+# Complete Setup (recommended for new machines)
+make complete-setup              # Complete setup with core packages
+make complete-setup-all          # Complete setup with all packages  
+make complete-setup-verbose      # Complete setup with detailed output
+
+# Complete Setup with Migration (for existing dotfiles)
+make complete-setup-migrate      # Migration + core packages
+make complete-setup-migrate-all  # Migration + all packages
+
+# Advanced Setup Options
+./scripts/complete-setup.sh --packages "zsh,git,tmux"  # Custom packages
+./scripts/complete-setup.sh --skip-deps               # Skip dependencies  
+./scripts/complete-setup.sh --skip-version-managers   # Skip version managers
+./scripts/complete-setup.sh --migrate                 # With migration
+./scripts/complete-setup.sh --migrate-backup-only     # Backup only
+
+# Traditional Multi-Step Setup
+make bootstrap                   # Install package managers first
+make install-deps               # Install development tools
+make setup-tools                # Setup version managers
+make install-core               # Install core dotfiles
+
+# Package Management
+make list                       # List all available packages
+make dry-run                    # Preview core installation
+make install-core               # Install core packages
 make install PACKAGES="zsh git tmux"  # Install specific packages
 make uninstall PACKAGES="zsh git"     # Remove packages
-make migrate                 # Migrate existing dotfiles
-make test                    # Run comprehensive tests
+
+# Migration (backup existing dotfiles)
+make migrate                    # Interactive migration
+make migrate-core               # Migrate core packages
+make migrate-all                # Migrate all packages
+make migrate-dry-run            # Preview migration
+make migrate-backup-only        # Just backup files
+
+# Testing & Maintenance
+make test                       # Run comprehensive tests
+make test-complete              # Test complete setup in Docker
+make test-stow-only             # Test stow-only process in Docker
+make health                     # Health check
+make status                     # Show current status
 
 # Or using Just
-just list                    # List all available packages
-just dry-run                 # Preview core installation  
-just install-core            # Install core packages
-just install zsh git tmux    # Install specific packages
-just uninstall zsh git       # Remove packages
-
-# Direct script usage
-./scripts/install.sh --list
-./scripts/install.sh --dry-run --all
-./scripts/install.sh --core
-./scripts/install.sh zsh wezterm git
-
-# Remove a package  
-./scripts/install.sh --unstow zsh
-
-# Install everything
-make install-all
-# OR
-./scripts/install.sh --all
+just complete-setup             # Complete setup with core packages
+just complete-setup-migrate     # Complete setup with migration
+just migrate-packages zsh git   # Migrate specific packages
+just list                       # List all available packages
+just dry-run                    # Preview core installation  
+just install-core               # Install core packages
+just uninstall zsh git          # Remove packages
 ```
 
 ## Task Runners
@@ -110,31 +270,77 @@ This repository includes modern task runners for easier management:
 
 ### Make (Makefile)
 ```bash
-make help                    # Show all available commands
-make install-core            # Install essential packages
+make help                        # Show all available commands
+
+# Complete Setup
+make complete-setup              # Complete setup with core packages
+make complete-setup-all          # Complete setup with all packages
+make complete-setup-verbose      # Complete setup with detailed output
+make complete-setup-migrate      # Complete setup with migration
+make complete-setup-migrate-all  # Complete setup with migration (all packages)
+
+# Traditional Setup
+make bootstrap                   # Install package managers
+make install-deps               # Install development tools
+make setup-tools                # Setup version managers
+make full-setup                 # Complete dependency setup
+
+# Package Management  
+make install-core               # Install essential packages
 make install PACKAGES="zsh git"  # Install specific packages
-make test                    # Run comprehensive tests
-make migrate                 # Migrate existing dotfiles
-make status                  # Show current dotfiles status
+make list                       # List available packages
+
+# Migration
+make migrate                    # Interactive migration
+make migrate-core               # Migrate core packages  
+make migrate-all                # Migrate all packages
+make migrate-dry-run            # Preview migration
+make migrate-backup-only        # Backup files only
+
+# Testing & Health
+make test                       # Run comprehensive tests
+make test-complete              # Test complete setup in Docker
+make health                     # Health check
+make status                     # Show current status
 ```
 
 ### Just (justfile) 
 Install [Just](https://github.com/casey/just) for an alternative task runner:
 ```bash
-just help                   # Show all available commands
-just install-core           # Install essential packages
-just install zsh git        # Install specific packages (simpler syntax)
-just test                   # Run comprehensive tests
-just migrate                # Migrate existing dotfiles
+just help                      # Show all available commands
+
+# Complete Setup  
+just complete-setup            # Complete setup with core packages
+just complete-setup-all        # Complete setup with all packages
+just complete-setup-migrate    # Complete setup with migration
+just complete-setup-migrate-all # Complete setup with migration (all packages)
+
+# Migration
+just migrate                   # Interactive migration
+just migrate-core              # Migrate core packages
+just migrate-all               # Migrate all packages
+just migrate-packages zsh git  # Migrate specific packages
+just migrate-dry-run           # Preview migration
+just migrate-backup-only       # Backup files only
+
+# Package Management
+just install-core              # Install essential packages
+just install zsh git           # Install specific packages (simpler syntax)
+just list                      # List available packages
+just test                      # Run comprehensive tests
+just migrate                   # Migrate existing dotfiles
 ```
 
 ### Direct Script Usage
 You can also run scripts directly:
 ```bash
-./scripts/install.sh --help    # Package management
-./scripts/migrate.sh           # Migration workflow
-./scripts/verify.sh            # Verify package structure
-./scripts/test.sh              # Docker testing
+./scripts/complete-setup.sh --help  # Complete setup with all options
+./scripts/install.sh --help         # Package management
+./scripts/migrate.sh                # Migration workflow
+./scripts/bootstrap.sh              # Bootstrap essentials
+./scripts/setup-tools.sh            # Setup version managers
+./scripts/verify.sh                 # Verify package structure
+./scripts/test.sh                   # Docker testing
 ```
 
 ## How It Works

@@ -83,6 +83,7 @@ usage() {
     echo "  -a, --all      Install all packages"
     echo "  -u, --unstow   Remove (unstow) packages instead of installing"
     echo "  -d, --dry-run  Show what would be done without making changes"
+    echo "  -f, --force    Overwrite existing files (use with caution)"
     echo ""
     echo "Examples:"
     echo "  $0 --core                    # Install core packages"
@@ -90,6 +91,7 @@ usage() {
     echo "  $0 zsh tmux git              # Install specific packages"
     echo "  $0 --unstow zsh              # Remove zsh package"
     echo "  $0 --dry-run --all           # Preview all package installations"
+    echo "  $0 --force --all             # Install all packages, overwriting conflicts"
 }
 
 # List available packages
@@ -106,11 +108,46 @@ list_packages() {
     printf '  %s\n' "${OTHER_PACKAGES[@]}"
 }
 
+# Convert relative symlinks to absolute
+convert_to_absolute_symlinks() {
+    local package="$1"
+    
+    echo -e "${BLUE}Converting relative symlinks to absolute for package: $package${NC}"
+    
+    # Find symlinks in home directory (limit to reasonable depth to avoid system dirs)
+    find "$HOME" -maxdepth 3 -type l 2>/dev/null | while IFS= read -r symlink; do
+        # Skip if this is a backup directory symlink
+        if [[ "$symlink" == *"/.dotfiles-backup-"* ]]; then
+            continue
+        fi
+        
+        target=$(readlink "$symlink")
+        
+        # Check if this symlink points to our stow package (relative path patterns)
+        if [[ "$target" == *"stow-packages/$package"* ]] || \
+           [[ "$target" == *"dotfiles/stow-packages/$package"* ]] || \
+           [[ "$target" == "../dotfiles/stow-packages/$package"* ]]; then
+            
+            # Get the absolute path of the current target
+            symlink_dir=$(dirname "$symlink")
+            if absolute_target=$(cd "$symlink_dir" && readlink -f "$symlink" 2>/dev/null); then
+                # Only update if the absolute path exists and is different from current
+                if [[ -e "$absolute_target" && "$target" != "$absolute_target" ]]; then
+                    echo "  Converting: $symlink -> $absolute_target"
+                    rm -f "$symlink"
+                    ln -sf "$absolute_target" "$symlink"
+                fi
+            fi
+        fi
+    done
+}
+
 # Stow a package
 stow_package() {
     local package="$1"
     local action="$2"  # "stow" or "unstow"
     local dry_run="$3" # "true" or "false"
+    local force="$4"   # "true" or "false"
     
     if [ ! -d "$STOW_DIR/$package" ]; then
         echo -e "${RED}Error: Package '$package' not found${NC}"
@@ -133,10 +170,19 @@ stow_package() {
         past_text="would be $past_text"
     fi
     
+    # Add force flag for adopting existing files
+    if [ "$force" = "true" ] && [ "$action" = "stow" ]; then
+        stow_cmd="$stow_cmd --adopt"
+        action_text="$action_text (adopting existing files)"
+    fi
+    
     echo -e "${BLUE}$action_text package: $package${NC}"
     
-    if (cd "$STOW_DIR" && $stow_cmd "$package" 2>&1); then
-        if [ "$dry_run" = "false" ]; then
+    if (cd "$STOW_DIR" && $stow_cmd -t "$HOME" "$package" 2>&1); then
+        if [ "$dry_run" = "false" ] && [ "$action" = "stow" ]; then
+            echo -e "${GREEN}✓ Package '$package' $past_text successfully${NC}"
+            convert_to_absolute_symlinks "$package"
+        elif [ "$dry_run" = "false" ]; then
             echo -e "${GREEN}✓ Package '$package' $past_text successfully${NC}"
         fi
     else
@@ -152,6 +198,7 @@ main() {
     local packages=()
     local action="stow"
     local dry_run="false"
+    local force="false"
     
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -178,6 +225,10 @@ main() {
                 ;;
             -d|--dry-run)
                 dry_run="true"
+                shift
+                ;;
+            -f|--force)
+                force="true"
                 shift
                 ;;
             -*)
@@ -209,10 +260,15 @@ main() {
         echo ""
     fi
     
+    if [ "$force" = "true" ]; then
+        echo -e "${YELLOW}FORCE MODE - Existing files will be adopted by stow${NC}"
+        echo ""
+    fi
+    
     # Process each package
     local failed=0
     for package in "${packages[@]}"; do
-        if ! stow_package "$package" "$action" "$dry_run"; then
+        if ! stow_package "$package" "$action" "$dry_run" "$force"; then
             failed=$((failed + 1))
         fi
     done

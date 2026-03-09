@@ -1,6 +1,6 @@
 -- WezTerm Event Handlers
 local wezterm = require("wezterm")
-local utils = require("wezterm.utils")
+local utils = require("utils")
 
 -- Tab title formatting
 local function format_title(title, is_active, max_width)

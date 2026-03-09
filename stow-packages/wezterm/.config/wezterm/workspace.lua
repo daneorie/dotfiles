@@ -1,7 +1,7 @@
 -- WezTerm Workspace Management
 local wezterm = require("wezterm")
 local act = wezterm.action
-local utils = require("wezterm.utils")
+local utils = require("utils")
 
 -- Repositories that use bare git repos (worktrees)
 local bare_repos = {
@@ -16,9 +16,9 @@ local function create_workspace_selector()
 	return wezterm.action_callback(function(window, pane)
 		local home = wezterm.glob(wezterm.home_dir)[1]
 		local workspaces = {
-			{ id = home .. "/dotfiles||dotfiles", label = home .. "/dotfiles" },
-			{ id = home .. "/wiki||wiki", label = home .. "/wiki" },
-			{ id = home .. "/repos||repos", label = home .. "/repos" },
+			{ id = home .. "/dotfiles||dotfiles",           label = home .. "/dotfiles" },
+			{ id = home .. "/wiki||wiki",                   label = home .. "/wiki" },
+			{ id = home .. "/repos||repos",                 label = home .. "/repos" },
 			{ id = home .. "/.local/share/nvim/lazy||lazy", label = home .. "/.local/share/nvim/lazy" },
 		}
 
@@ -162,3 +162,4 @@ return {
 	switch_workspace_selector = switch_workspace_selector,
 	create_new_workspace = create_new_workspace,
 }
+

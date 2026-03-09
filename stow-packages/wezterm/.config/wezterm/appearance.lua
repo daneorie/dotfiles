@@ -1,5 +1,5 @@
 -- WezTerm Appearance Configuration
-local utils = require("wezterm.utils")
+local utils = require("utils")
 
 local function apply_appearance(config)
 	-- Color scheme and transparency
