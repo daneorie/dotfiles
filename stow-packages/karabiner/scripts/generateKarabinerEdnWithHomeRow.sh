@@ -2,6 +2,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 karabiner="$SCRIPT_DIR/../.config/karabiner.edn"
+cd "$SCRIPT_DIR" || { echo "Failed to change directory to $SCRIPT_DIR" >&2; exit 1; }
 
 echo "{" > $karabiner
 cat setup.edn >> $karabiner
