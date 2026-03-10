@@ -68,7 +68,7 @@
                                                         ;; You can't use '~' for the users home directory
     :notification "osascript -e 'display notification \"%s\" with title \"%s\"'"
                                                         ;; Display notification
-                                                        ;; notifcation "text" "title"
+                                                        ;; notification "text" "title"
     :type "osascript -e 'tell application \"System Events\" to keystroke \"%s\" as text'"
     :snippet "cat '~/Library/Mobile Documents/com~apple~CloudDocs/Snippets/%s' | pbcopy -pboard general"
     :beep "osascript -e 'beep'"                         ;; Play default beep
