@@ -55,7 +55,8 @@ else
 fi
 
 echo "Test 4: Package structure"
-package_count=$(ls ../stow-packages/ | wc -l)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+package_count=$(ls "$SCRIPT_DIR/../stow-packages/" | wc -l)
 if [[ $package_count -ge 15 ]]; then
     echo "✓ Found $package_count packages (>= 15 required)"
 else
