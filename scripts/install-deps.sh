@@ -64,6 +64,7 @@ BREW_CORE_PACKAGES=(
 	"git-delta" # Better git diff
 	"lazygit"   # Git TUI
 	"gh"        # GitHub CLI
+	"eslint"    # JavaScript/TypeScript linter
 
 	# Compression and archives
 	"unzip"
@@ -107,6 +108,12 @@ BREW_LANG_PACKAGES=(
 	# Other
 	"lua"
 	"luarocks"
+)
+
+# NPM Global packages
+NPM_GLOBAL_PACKAGES=(
+	"write-good"  # Writing style linter
+	"eslint_d"    # Fast ESLint daemon
 )
 
 # Install packages with error handling
@@ -203,6 +210,42 @@ install_language_packages() {
 	echo ""
 }
 
+# Install NPM global packages
+install_npm_packages() {
+	echo -e "${BLUE}Installing NPM global packages...${NC}"
+	
+	# Check if npm is available
+	if ! command -v npm &>/dev/null; then
+		echo -e "${YELLOW}⚠ npm not found - skipping npm packages${NC}"
+		echo "Run this script again after installing Node.js"
+		echo ""
+		return
+	fi
+	
+	local failed=0
+	for package in "${NPM_GLOBAL_PACKAGES[@]}"; do
+		# Check if package is already installed
+		if npm list -g --depth=0 "$package" &>/dev/null; then
+			echo -e "${GREEN}✓ $package (npm global) already installed${NC}"
+		else
+			echo -e "${YELLOW}Installing $package (npm global)...${NC}"
+			if npm install -g "$package"; then
+				echo -e "${GREEN}✓ $package installed successfully${NC}"
+			else
+				echo -e "${YELLOW}⚠ Failed to install $package - continuing...${NC}"
+				failed=$((failed + 1))
+			fi
+		fi
+	done
+	
+	if [[ $failed -eq 0 ]]; then
+		echo -e "${GREEN}✓ All NPM packages installed successfully${NC}"
+	else
+		echo -e "${YELLOW}⚠ $failed NPM packages failed to install${NC}"
+	fi
+	echo ""
+}
+
 # Update Homebrew and upgrade packages
 update_homebrew() {
 	echo -e "${BLUE}Updating Homebrew...${NC}"
@@ -233,11 +276,17 @@ setup_integrations() {
 usage() {
 	echo "Usage: $0 [OPTIONS]"
 	echo ""
+	echo "Installs development tools via Homebrew and NPM:"
+	echo "  • Core CLI tools (ripgrep, fzf, bat, eslint, etc.)"
+	echo "  • GUI applications (optional)"
+	echo "  • Programming language tools (Node.js, Python, etc.)"
+	echo "  • NPM global packages (write-good, eslint_d)"
+	echo ""
 	echo "Options:"
 	echo "  -h, --help      Show this help message"
 	echo "  -c, --core      Install only core CLI tools"
 	echo "  -g, --gui       Install only GUI applications"
-	echo "  -l, --lang      Install only language tools"
+	echo "  -l, --lang      Install only language tools and npm packages"
 	echo "  -a, --all       Install all packages (default)"
 	echo "  -u, --update    Update Homebrew before installing"
 	echo ""
@@ -303,6 +352,7 @@ main() {
 		install_core_packages
 		install_gui_packages
 		install_language_packages
+		install_npm_packages
 	else
 		if [[ "$install_core" == "true" ]]; then
 			install_core_packages
@@ -312,6 +362,7 @@ main() {
 		fi
 		if [[ "$install_lang" == "true" ]]; then
 			install_language_packages
+			install_npm_packages  # Install npm packages with language tools
 		fi
 	fi
 
