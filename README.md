@@ -14,7 +14,7 @@ git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
 # 2. Complete setup - dependencies + stow packages in one command
-make complete-setup        # Core packages (recommended)
+make complete-setup         # Core packages (recommended)
 make complete-setup-all     # All packages
 make complete-setup-verbose # With detailed output
 
@@ -221,22 +221,22 @@ make complete-setup-migrate      # Migration + core packages
 make complete-setup-migrate-all  # Migration + all packages
 
 # Advanced Setup Options
-./scripts/complete-setup.sh --packages "zsh,git,tmux"  # Custom packages
+./scripts/complete-setup.sh --packages "zsh,git,tmux" # Custom packages
 ./scripts/complete-setup.sh --skip-deps               # Skip dependencies  
 ./scripts/complete-setup.sh --skip-version-managers   # Skip version managers
 ./scripts/complete-setup.sh --migrate                 # With migration
 ./scripts/complete-setup.sh --migrate-backup-only     # Backup only
 
 # Traditional Multi-Step Setup
-make bootstrap                   # Install package managers first
+make bootstrap                  # Install package managers first
 make install-deps               # Install development tools
 make setup-tools                # Setup version managers
 make install-core               # Install core dotfiles
 
 # Package Management
-make list                       # List all available packages
-make dry-run                    # Preview core installation
-make install-core               # Install core packages
+make list                             # List all available packages
+make dry-run                          # Preview core installation
+make install-core                     # Install core packages
 make install PACKAGES="zsh git tmux"  # Install specific packages
 make uninstall PACKAGES="zsh git"     # Remove packages
 
@@ -280,14 +280,14 @@ make complete-setup-migrate      # Complete setup with migration
 make complete-setup-migrate-all  # Complete setup with migration (all packages)
 
 # Traditional Setup
-make bootstrap                   # Install package managers
+make bootstrap                  # Install package managers
 make install-deps               # Install development tools
 make setup-tools                # Setup version managers
 make full-setup                 # Complete dependency setup
 
 # Package Management  
 make install-core               # Install essential packages
-make install PACKAGES="zsh git"  # Install specific packages
+make install PACKAGES="zsh git" # Install specific packages
 make list                       # List available packages
 
 # Migration
@@ -310,9 +310,9 @@ Install [Just](https://github.com/casey/just) for an alternative task runner:
 just help                      # Show all available commands
 
 # Complete Setup  
-just complete-setup            # Complete setup with core packages
-just complete-setup-all        # Complete setup with all packages
-just complete-setup-migrate    # Complete setup with migration
+just complete-setup             # Complete setup with core packages
+just complete-setup-all         # Complete setup with all packages
+just complete-setup-migrate     # Complete setup with migration
 just complete-setup-migrate-all # Complete setup with migration (all packages)
 
 # Migration
@@ -418,111 +418,6 @@ The Docker environment includes:
 
 See [TESTING.md](TESTING.md) for detailed testing instructions.
 
----
-
-## Legacy Setup Information
-
-<details>
-<summary>Click to expand original manual setup instructions</summary>
-
-This section contains the original manual setup instructions that have been superseded by the Stow-based approach above.
-
-### To be sorted
-
-```bash
-brew install ripgrep
-npm i -g write-good
-npm i -g eslint_d
-brew install eslint
-brew install lazydocker
-brew install ctop
-npm i -g dockly
-brew install tokei
-brew install bottom
-brew install navi
-brew install sketchybar
-brew install kindavim
-brew install hammerspoon
-```
-
-### Basic Setup
-
-Symlink a bunch of files and folders
-
-```
-ln -s ~/dotfiles/.zshrc ~
-ln -s ~/dotfiles/.vimrc ~
-ln -s ~/dotfiles/.exrc ~
-ln -s ~/dotfiles/.inputrc ~
-ln -s ~/dotfiles/.lesskey ~
-ln -s ~/dotfiles/.tmux.conf ~
-ln -s ~/dotfiles/.yabairc ~
-ln -s ~/dotfiles/.skhdrc ~
-ln -s ~/dotfiles/.wezterm.lua ~
-ln -s ~/dotfiles/com.example.KeyRemapping.plist ~/Library/LaunchAgents/
-ln -s ~/dotfiles/lazygit/ ~/.config/
-ln -s ~/dotfiles/nvim/ ~/.config/
-ln -s ~/dotfiles/nvimpager/ ~/.config/
-ln -s ~/dotfiles/gitui/ ~/.config/
-ln -s ~/dotfiles/alacritty/ ~/.config/
-ln -s ~/dotfiles/yazi/ ~/.config/
-ln -s ~/dotfiles/ubersicht/widgets/ ~/Library/Application\ Support/Übersicht/
-ln -s ~/dotfiles/sketchybar ~/.config/
-ln -s ~/dotfiles/hammerspoon ~/.hammerspoon
-ln -s ~/dotfiles/aerospace ~/.config/
-
-# scripts
-ln -s ~/dotfiles/scripts/tmux-sessionizer ~/.local/bin/
-ln -s ~/dotfiles/scripts/tmux-windowizer ~/.local/bin/
-
-# start the services
-yabai --start-service
-brew services start sketchybar
-brew services start hammerspoon
-```
-
-Install Homebrew
-
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-Install NeoVim
-
-```
-brew install neovim
-```
-
-Node is necessary for some plugins
-
-```
-brew install node
-```
-
-Antigen is the plugin manager for zsh
-
-```
-brew install antigen
-```
-
-Install a bunch of GUI apps using cask
-
-```
-brew install --cask alacritty
-brew install --cask spacelauncher
-brew install --cask topnotch
-brew install --cask discord
-brew install --cask github
-brew install --cask ubersicht
-```
-
-Install a few commands
-
-```
-brew install fd
-brew install fzf
-```
-
 Setup terminfo
 
 ```
@@ -549,50 +444,3 @@ defaults write -g CGFontRenderingFontSmoothingDisabled -bool NO
 defaults -currentHost write -globalDomain AppleFontSmoothing -int 2
 ```
 
-Set or create an environment variable NVIM_HOME in the 'rc' file to the location of the nvim directory. Currently, this is only referenced for the swap file directory.
-
-```
-set NVIM_HOME="/path/to/nvim/"
-```
-
-### Java LSP Setup (configuration files are already setup)
-
-Download [eclipse.jdt.ls](https://github.com/eclipse/eclipse.jdt.ls#installation) to `/Library/Java/LanguageServers`
-
-1. Install the various JDKs.
-   ```
-   brew install openjdk@11 # for example
-   ```
-2. Link them to `/Library/Java/JavaVirtualMachines`.
-   ```
-   sudo ln -sfn ~/Documents/zulu-OpenJDK/openjdk-11.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
-   ```
-3. Add `Contents/Home` to `jenv`. If an installation fails (for ARM or something), use [zulu](https://www.azul.com/downloads/?version=java-8-lts&architecture=arm-64-bit&package=jdk) instead.
-   ```
-   jenv add /Library/Java/JavaVirtualMachines/openjdk-11.jdk/Contents/Home
-   ```
-
-Clone and build in `$HOME/Documents/GitHub/`:
-
-- [java-debug](https://github.com/microsoft/java-debug)
-
-```
-./mvnw clean install
-```
-
-- [vscode-java-test](https://github.com/microsoft/vscode-java-test)
-
-```
-npm install
-npm run build-plugin
-```
-
-### Plugin List
-
-[Extended plugin list for Neovim - see original README for complete list]
-
-</details>
-
----
-
-*Managed with ❤️ using GNU Stow*
