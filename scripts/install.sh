@@ -177,8 +177,10 @@ cleanup_stow_conflicts() {
             # If the old target had actual content, back it up
             if [[ -d "$old_target" && -n "$(ls -A "$old_target" 2>/dev/null)" ]]; then
                 echo -e "${YELLOW}  Backing up content from old .config location${NC}"
-                mkdir -p "$HOME/.dotfiles-emergency-backup-$(date +%s)"
-                cp -r "$old_target" "$HOME/.dotfiles-emergency-backup-$(date +%s)/.config-from-$(basename "$(dirname "$old_target")")"
+                local backup_timestamp
+                backup_timestamp=$(date +%s)
+                mkdir -p "$HOME/.dotfiles-emergency-backup-${backup_timestamp}"
+                cp -r "$old_target" "$HOME/.dotfiles-emergency-backup-${backup_timestamp}/.config-from-$(basename "$(dirname "$old_target")")"
             fi
         elif [[ -d "$HOME/.config" ]]; then
             # Check if this package would create .config as a TOP-LEVEL symlink
