@@ -97,7 +97,7 @@ services:
         chmod +x *.sh &&
         echo 'Setup verification:' &&
         echo '  Scripts present:' && ls -la *.sh | wc -l &&
-        echo '  Stow packages:' && ls stow-packages/ | wc -l &&
+        echo '  Stow packages:' && ls ../stow-packages/ | wc -l &&
         echo '' &&
         echo 'Stow-only dotfiles testing environment ready!' &&
         echo 'Available commands:' &&
