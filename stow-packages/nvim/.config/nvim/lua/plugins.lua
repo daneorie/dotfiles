@@ -414,7 +414,7 @@ require("lazy").setup({
 			{
 				"<localleader>re",
 				"<cmd>lua require('kulala').set_selected_env()<cr>",
-				desc = "Run all requests",
+				desc = "Set environment",
 				ft = { "http", "rest" },
 			},
 		},
