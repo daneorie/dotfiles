@@ -163,8 +163,23 @@ cleanup_stow_conflicts() {
 	local package="$1"
 	echo -e "${YELLOW}Cleaning up potential stow conflicts for package: $package${NC}"
 
-	# Remove any broken symlinks that might interfere
-	find "$HOME" -maxdepth 2 -type l -exec test ! -e {} \; -delete 2>/dev/null || true
+	# Remove broken symlinks that point into the stow-packages directory only
+	find "$HOME" -maxdepth 2 -type l 2>/dev/null | while IFS= read -r symlink; do
+		# Only consider broken symlinks
+		if [[ ! -e "$symlink" ]]; then
+			# Resolve the symlink target; handle relative paths by resolving from the symlink's directory
+			local target
+			target=$(readlink "$symlink" 2>/dev/null || true)
+			if [[ -n "$target" ]]; then
+				local resolved_target
+				resolved_target=$(realpath -m "$(dirname "$symlink")/$target" 2>/dev/null || true)
+				# Delete only if the resolved target is under the stow-packages directory
+				if [[ -n "$resolved_target" && "$resolved_target" == "$STOW_DIR"/* ]]; then
+					rm -f "$symlink"
+				fi
+			fi
+		fi
+	done || true
 
 	# Handle .config directory specially - this is the main source of conflicts
 	if [[ -e "$HOME/.config" ]]; then
