@@ -1,0 +1,35 @@
+# Git files
+.git
+.gitignore
+
+# Docker files 
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# macOS files
+.DS_Store
+**/.DS_Store
+
+# Backup directories
+.dotfiles-backup-*
+
+# Test files and logs
+*.log
+test-results/
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Node modules (if any)
+node_modules/
+
+# Python cache
+__pycache__/
+*.pyc
