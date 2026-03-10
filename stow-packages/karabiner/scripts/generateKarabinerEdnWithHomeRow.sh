@@ -1,6 +1,7 @@
 #!/bin/zsh
 
-karabiner=../.config/karabiner.edn
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+karabiner="$SCRIPT_DIR/../.config/karabiner.edn"
 
 echo "{" > $karabiner
 cat setup.edn >> $karabiner
