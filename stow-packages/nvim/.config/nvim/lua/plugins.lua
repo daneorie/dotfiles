@@ -116,10 +116,20 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"ggandor/leap.nvim",
+		url = "https://codeberg.org/andyg/leap.nvim",
 		dependencies = { "tpope/vim-repeat" },
 		config = function()
-			require("leap").add_default_mappings()
+			-- add_default_mappings() is deprecated; use explicit keymaps instead
+			-- Sneak-style layout: s=forward, S=backward, gs=from-window
+			vim.keymap.set({ "n", "x", "o" }, "s", "<Plug>(leap-forward)", {
+				desc = "Leap forward",
+			})
+			vim.keymap.set({ "n", "x", "o" }, "S", "<Plug>(leap-backward)", {
+				desc = "Leap backward",
+			})
+			vim.keymap.set("n", "gs", "<Plug>(leap-from-window)", {
+				desc = "Leap from window",
+			})
 		end,
 	},
 
