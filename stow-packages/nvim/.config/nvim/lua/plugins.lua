@@ -20,7 +20,8 @@ require("lazy").setup({
 		cmd = "Neoconf",
 	},
 	{
-		"folke/neodev.nvim",
+		"folke/lazydev.nvim",
+		ft = "lua",
 	},
 
 	-- WhichKey
@@ -131,43 +132,23 @@ require("lazy").setup({
 		end,
 	},
 
-	-- Treesitter
+	-- Treesitter (built-in to Neovim 0.12+)
 	{
 		"nvim-treesitter/nvim-treesitter",
-		priority = 1000, -- High priority to ensure it loads before markview
+		branch = "main",
+		lazy = false,
 		build = ":TSUpdate",
 		config = function()
+			require("nvim-treesitter").setup {}
 			require("config.treesitter").setup()
-			local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-			parser_config.http = {
-				install_info = {
-					url = "https://github.com/mistweaverco/tree-sitter-kulala",
-					files = { "src/parser.c" },
-					branch = "main",
-					generate_requires_npm = false,
-					requires_generate_from_grammar = false,
-				},
-				filetype = "http",
-			}
-			parser_config.jelly = {
-				install_info = {
-					url = "https://github.com/OpenJelly/tree-sitter-jelly", -- local path or git repo
-					files = { "src/parser.c", "src/scanner.c" }, -- note that some parsers also require src/scanner.c or src/scanner.cc
-					-- optional entries:
-					branch = "main", -- default branch in case of git repo if different from master
-					generate_requires_npm = false, -- if stand-alone parser without npm dependencies
-					requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
-				},
-				--filetype = "jelly", -- if filetype does not match the parser name
-			}
 		end,
 		dependencies = {
-			{ "nvim-treesitter/nvim-treesitter-textobjects", event = "BufReadPre" },
+			{ "nvim-treesitter/nvim-treesitter-textobjects", branch = "main" },
 			{
 				"windwp/nvim-ts-autotag",
 				event = "InsertEnter",
 				config = function()
-					require("nvim-treesitter.configs").setup({ autotag = { enable = true } })
+					require("nvim-ts-autotag").setup()
 				end,
 			},
 		},
@@ -274,51 +255,102 @@ require("lazy").setup({
 		},
 	},
 
-	-- LSP
+	-- LSP (using native vim.lsp.config in Neovim 0.12+)
 	{
 		"neovim/nvim-lspconfig",
+		lazy = true, -- loaded by Mason and typescript-tools
+	},
+
+	-- LSP Management
+	{
+		"williamboman/mason.nvim",
+		build = ":MasonUpdate",
 		config = function()
+			require("mason").setup({
+				ui = {
+					icons = {
+						package_installed = "✓",
+						package_pending = "➜",
+						package_uninstalled = "✗",
+					},
+				},
+			})
+			-- Initialize LSP after Mason
 			require("config.lsp").setup()
 		end,
-		dependencies = {
-			"williamboman/mason.nvim",
-			"williamboman/mason-lspconfig.nvim",
-			"WhoIsSethDaniel/mason-tool-installer.nvim",
-			"jayp0521/mason-null-ls.nvim",
-			"folke/neodev.nvim",
-			"b0o/schemastore.nvim",
-			"jose-elias-alvarez/typescript.nvim",
-			--"jose-elias-alvarez/null-ls.nvim", -- for formatters and linters
-			"nvimtools/none-ls.nvim",
-			"lvimuser/lsp-inlayhints.nvim",
-			"ray-x/lsp_signature.nvim",
-			"pierreglaser/folding-nvim",
-			{
-				"RRethy/vim-illuminate",
-				config = function()
-					require("config.illuminate").setup()
-				end,
-			},
-			{
-				"j-hui/fidget.nvim",
-				tag = "legacy",
-				config = function()
-					require("fidget").setup()
-				end,
-			},
-			{
-				"SmiteshP/nvim-navic",
-				config = function()
-					require("nvim-navic").setup()
-				end,
-			},
-			{
-				"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
-				config = function()
-					require("lsp_lines").setup()
-				end,
-			},
-		},
+	},
+	{
+		"williamboman/mason-lspconfig.nvim",
+		dependencies = { "mason.nvim" },
+		config = function()
+			require("config.lsp.mason-config").setup()
+		end,
+	},
+	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = { "mason.nvim" },
+		config = function()
+			require("mason-tool-installer").setup({
+				ensure_installed = { "codelldb", "stylua", "shfmt", "shellcheck", "prettierd" },
+				auto_update = false,
+				run_on_start = true,
+			})
+		end,
+	},
+	{
+		"jayp0521/mason-null-ls.nvim",
+		dependencies = { "mason.nvim" },
+	},
+
+	-- LSP Utilities
+	{
+		"b0o/schemastore.nvim",
+		lazy = true,
+	},
+	{
+		"nvimtools/none-ls.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = function()
+			require("config.lsp.null-ls").setup()
+		end,
+	},
+	{
+		"lvimuser/lsp-inlayhints.nvim",
+		config = function()
+			require("config.lsp.lsp-inlayhints").setup()
+		end,
+	},
+	{
+		"ray-x/lsp_signature.nvim",
+		config = true,
+	},
+	{
+		"pierreglaser/folding-nvim",
+	},
+	{
+		"RRethy/vim-illuminate",
+		config = function()
+			require("config.illuminate").setup()
+		end,
+	},
+	{
+		"j-hui/fidget.nvim",
+		tag = "legacy",
+		config = function()
+			require("fidget").setup()
+		end,
+	},
+	{
+		"SmiteshP/nvim-navic",
+		config = function()
+			require("nvim-navic").setup()
+		end,
+	},
+	{
+		"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+		config = function()
+			require("lsp_lines").setup()
+		end,
 	},
 
 	-- Terminal
@@ -343,7 +375,6 @@ require("lazy").setup({
 				},
 			})
 		end,
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
 	},
 
 	-- Fuzzy Finder/Telescope/Navigation
@@ -394,6 +425,7 @@ require("lazy").setup({
 	-- REST
 	{
 		"vhyrro/luarocks.nvim",
+		priority = 1000,
 		opts = {
 			rocks = {
 				"lua-curl",
@@ -403,8 +435,17 @@ require("lazy").setup({
 				"magick",
 			},
 		},
-		priority = 1000,
-		config = true,
+		config = function(_, opts)
+			-- luarocks 3.13+ vendors dkjson inside luarocks/vendor/ instead of
+			-- exposing it as a top-level module. Add the vendor path so that
+			-- require("dkjson") works when luarocks.loader is loaded.
+			local rocks_path = vim.fn.stdpath("data") .. "/lazy/luarocks.nvim/.rocks"
+			local vendor_path = rocks_path .. "/share/lua/5.1/luarocks/vendor/?.lua"
+			if not package.path:find(vendor_path, 1, true) then
+				package.path = package.path .. ";" .. vendor_path
+			end
+			require("luarocks-nvim").setup(opts)
+		end,
 	},
 	{
 		"mistweaverco/kulala.nvim",
@@ -469,13 +510,24 @@ require("lazy").setup({
 		end,
 	},
 
+	-- TypeScript / JavaScript
+	{
+		"pmizio/typescript-tools.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"neovim/nvim-lspconfig",
+		},
+		ft = { "typescript", "javascript", "typescriptreact", "javascriptreact" },
+	},
+
 	-- Rust
 	{
-		"simrat39/rust-tools.nvim",
+		"mrcjkb/rustaceanvim",
+		version = "^5",
+		lazy = false,
 		ft = { "rust" },
 		dependencies = {
 			"nvim-lua/plenary.nvim",
-			"rust-lang/rust.vim",
 		},
 	},
 	{
@@ -532,7 +584,6 @@ require("lazy").setup({
 		"stevearc/aerial.nvim",
 		opts = {},
 		dependencies = {
-			"nvim-treesitter/nvim-treesitter",
 			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
@@ -585,17 +636,12 @@ require("lazy").setup({
 		lazy = false,
 		priority = 500, -- Lower priority than treesitter to ensure proper load order
 		dependencies = {
-			"nvim-treesitter/nvim-treesitter",
 			"nvim-tree/nvim-web-devicons",
 		},
 		config = function()
-			-- Wait for treesitter to be fully loaded
-			require("nvim-treesitter")
-
-			-- Optional: Configure markview if needed
-			-- require("markview").setup({
-			--     -- your config here
-			-- })
+			require("markview").setup({
+				experimental = { check_rtp_message = false },
+			})
 		end,
 	},
 	{
