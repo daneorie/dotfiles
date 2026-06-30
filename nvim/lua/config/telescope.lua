@@ -78,6 +78,7 @@ end
 
 function M.setup()
 	local telescope = require("telescope")
+	
 	telescope.setup({
 		defaults = {
 			file_ignore_patterns = {
@@ -89,6 +90,29 @@ function M.setup()
 				n = n_mappings,
 				i = i_mappings,
 			},
+			-- Custom buffer previewer that disables TreeSitter to prevent errors
+			buffer_previewer_maker = function(filepath, bufnr, opts)
+				opts = opts or {}
+				
+				-- Use the default previewer but disable TreeSitter
+				local previewers_utils = require("telescope.previewers.utils")
+				previewers_utils.job_maker({ "cat", filepath }, bufnr, opts)
+				
+				-- Disable TreeSitter highlighting for this buffer to prevent errors
+				vim.schedule(function()
+					if vim.api.nvim_buf_is_valid(bufnr) then
+						-- Disable TreeSitter highlighting
+						vim.treesitter.stop(bufnr)
+						
+						-- Enable basic syntax highlighting instead
+						local ft = vim.filetype.match({ buf = bufnr, filename = filepath })
+						if ft and ft ~= "" then
+							vim.bo[bufnr].filetype = ft
+							vim.cmd(string.format("silent! syntax enable | silent! set filetype=%s", ft))
+						end
+					end
+				end)
+			end,
 		},
 		pickers = {
 			buffers = {

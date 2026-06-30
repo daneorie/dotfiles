@@ -93,6 +93,7 @@ antigen apply
 #   Here's the circle of mappings: n -> h -> i -> k -> o -> l -> e -> j -> n
 #   Use this circle to determine the original mappings. (I used the reverse to generate the below mappings.)
 bindkey -v
+bindkey -M viins '^[[Z' reverse-menu-complete
 bindkey -M vicmd "h" vi-insert
 bindkey -M vicmd "j" vi-repeat-search
 bindkey -M vicmd "k" vi-open-line-below
@@ -174,3 +175,9 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_ENV_HINTS=1
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+export PATH="/Users/dorie/.rd/bin:$PATH"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)

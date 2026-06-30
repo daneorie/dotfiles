@@ -156,7 +156,7 @@ key_bindings:
   - { key: Minus, mods: Control, chars: "\x1b[45;5u" } # ctrl--
   - { key: Period, mods: Control, chars: "\x1b[46;5u" } # ctrl-.
   - { key: Equals, mods: Control, chars: "\x1b[61;5u" } # ctrl-=
-  - { key: LBracket, mods: Control, chars: "\x33[91;5u" } # ctrl-[ - overlaps ESC
+  # - { key: LBracket, mods: Control, chars: "\x33[91;5u" } # ctrl-[ - overlaps ESC (temporarily disabled)
   - { key: RBracket, mods: Control, chars: "\x1b[93;5u" } # ctrl-]
   - { key: H, mods: Control, chars: "\x33[104;5u" } # ctrl-h - overlaps BS/Backspace
   - { key: I, mods: Control, chars: "\x33[105;5u" } # ctrl-i - overlaps TAB

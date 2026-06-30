@@ -36,11 +36,14 @@ local options = {
 	swapfile = false, -- creates a swapfile
 	tabstop = 4, -- insert 4 spaces for a tab
 	--termguicolors = true,                      -- set term gui colors (most terminals support this)
-	timeoutlen = 1000, -- time to wait for a mapped sequence to complete (in milliseconds)
+	timeoutlen = 300, -- time to wait for a mapped sequence to complete (in milliseconds)
+	ttimeoutlen = 10, -- time to wait for key codes (escape sequences)
 	undofile = true, -- enable persistent undo
 	updatetime = 300, -- faster completion (4000ms default)
 	wrap = false, -- display lines as one long line
 	writebackup = false, -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
+	-- Enable basic vim syntax highlighting since treesitter is disabled
+	syntax = "on",
 }
 
 function M.setup()
@@ -63,6 +66,12 @@ function M.setup()
 
 	pcall(function()
 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+	end)
+
+	-- Enable basic vim syntax highlighting since treesitter is disabled
+	pcall(function()
+		vim.cmd("syntax enable")
+		vim.cmd("filetype plugin indent on")
 	end)
 end
 

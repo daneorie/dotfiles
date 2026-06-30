@@ -27,6 +27,9 @@ local bottom = "btm"
 -- navi
 local navi = "navi fn welcome"
 
+-- OpenCode
+local opencode = "opencode"
+
 local git_client = Terminal:new({
 	cmd = git_tui,
 	dir = "git_dir",
@@ -110,6 +113,17 @@ local interactive_cheatsheet = Terminal:new({
 	close_on_exit = false,
 })
 
+local opencode_client = Terminal:new({
+	cmd = opencode,
+	dir = "git_dir",
+	hidden = true,
+	direction = "float",
+	float_opts = {
+		border = "double",
+	},
+	close_on_exit = true,
+})
+
 function M.git_client_toggle()
 	git_client:toggle()
 end
@@ -140,6 +154,10 @@ end
 
 function M.interactive_cheatsheet_toggle()
 	interactive_cheatsheet:toggle()
+end
+
+function M.opencode_toggle()
+	opencode_client:toggle()
 end
 
 -- Open a terminal

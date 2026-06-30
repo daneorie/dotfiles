@@ -57,12 +57,16 @@ config.window_decorations = "RESIZE"
 config.use_fancy_tab_bar = false
 
 local bare_repos = {
+	"dotfiles",
 	"plan-your-day",
+	"global-fuelight-refuel-experience",
+	"global-fuelight-refuel-experience/feat",
 	"sports-fan365-backend",
 	"sports-fan365-backend/feature",
 	--"sports-fan365-backend-old",
 	--"sports-fan365-backend-old/feature",
 	"broski_orie",
+	"captech-skills",
 	"arcolla-backend",
 	"arcolla-backend/feature",
 	"arcolavfd-web",
@@ -187,6 +191,67 @@ local function resolve_path(cwd, current_pane)
 	end
 end
 
+-- Function to create a new tab at a specific position
+local function spawn_tab_at_position(window, pane, position)
+	local tab, new_pane, new_window = window:mux_window():spawn_tab({
+		cwd = pane:get_current_working_dir(),
+	})
+
+	-- Move the new tab to the specified position
+	local tabs = window:mux_window():tabs()
+	local new_tab_index = #tabs - 1 -- New tab is at the end, 0-indexed
+
+	-- If position is beyond current tabs, just leave it at the end
+	if position >= #tabs then
+		return
+	end
+
+	-- Move the tab to the desired position by swapping
+	for i = new_tab_index, position + 1, -1 do
+		window:perform_action(act.MoveTab(i - 1), pane)
+	end
+end
+
+-- Function to move current tab left (swap with previous tab)
+local function move_tab_left(window, pane)
+	local current_tab_index = window:active_tab():tab_id()
+	local tabs = window:mux_window():tabs()
+
+	-- Find the current tab's position in the tabs array
+	local current_position = nil
+	for i, tab in ipairs(tabs) do
+		if tab:tab_id() == current_tab_index then
+			current_position = i - 1 -- Convert to 0-indexed
+			break
+		end
+	end
+
+	-- Move left if not at the beginning
+	if current_position and current_position > 0 then
+		window:perform_action(act.MoveTab(current_position - 1), pane)
+	end
+end
+
+-- Function to move current tab right (swap with next tab)
+local function move_tab_right(window, pane)
+	local current_tab_index = window:active_tab():tab_id()
+	local tabs = window:mux_window():tabs()
+
+	-- Find the current tab's position in the tabs array
+	local current_position = nil
+	for i, tab in ipairs(tabs) do
+		if tab:tab_id() == current_tab_index then
+			current_position = i - 1 -- Convert to 0-indexed
+			break
+		end
+	end
+
+	-- Move right if not at the end
+	if current_position and current_position < #tabs - 1 then
+		window:perform_action(act.MoveTab(current_position + 1), pane)
+	end
+end
+
 -- Setup full-stack development tabs
 wezterm.on("setup-fullstack-tabs", function(window, pane)
 	-- Check if tabs already exist to prevent duplicates
@@ -299,7 +364,82 @@ config.keys = {
 	{ key = "d", mods = SUPER, action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 	{ key = "d", mods = SUPER .. "|SHIFT", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
 	{ key = "w", mods = SUPER, action = act.CloseCurrentPane({ confirm = true }) },
+	-- Tab management
 	{ key = "t", mods = SUPER, action = act.SpawnTab("CurrentPaneDomain") },
+	{ key = "{", mods = SUPER .. "|SHIFT", action = wezterm.action_callback(move_tab_left) },
+	{ key = "}", mods = SUPER .. "|SHIFT", action = wezterm.action_callback(move_tab_right) },
+
+	-- Create new tab at specific position (Cmd+Shift+Number)
+	{
+		key = "1",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 0)
+		end),
+	},
+	{
+		key = "2",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 1)
+		end),
+	},
+	{
+		key = "3",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 2)
+		end),
+	},
+	{
+		key = "4",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 3)
+		end),
+	},
+	{
+		key = "5",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 4)
+		end),
+	},
+	{
+		key = "6",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 5)
+		end),
+	},
+	{
+		key = "7",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 6)
+		end),
+	},
+	{
+		key = "8",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 7)
+		end),
+	},
+	{
+		key = "9",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 8)
+		end),
+	},
+	{
+		key = "0",
+		mods = SUPER .. "|SHIFT",
+		action = wezterm.action_callback(function(window, pane)
+			spawn_tab_at_position(window, pane, 9)
+		end),
+	},
 	{ key = "LeftArrow", mods = SUPER, action = act.AdjustPaneSize({ "Left", 5 }) },
 	{ key = "DownArrow", mods = SUPER, action = act.AdjustPaneSize({ "Down", 5 }) },
 	{ key = "UpArrow", mods = SUPER, action = act.AdjustPaneSize({ "Up", 5 }) },

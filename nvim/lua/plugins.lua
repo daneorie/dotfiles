@@ -125,36 +125,22 @@ require("lazy").setup({
 		end,
 	},
 
-	-- Treesitter
+	-- Treesitter - Temporarily disabled due to API compatibility issues with Neovim 0.12.1
 	{
 		"nvim-treesitter/nvim-treesitter",
-		priority = 1000, -- High priority to ensure it loads before markview
+		branch = "main",
+		enabled = true,
+		priority = 1000,
 		build = ":TSUpdate",
 		config = function()
-			require("config.treesitter").setup()
-			local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-			parser_config.http = {
-				install_info = {
-					url = "https://github.com/mistweaverco/tree-sitter-kulala",
-					files = { "src/parser.c" },
-					branch = "main",
-					generate_requires_npm = false,
-					requires_generate_from_grammar = false,
-				},
-				filetype = { "http", "rest" },
-				--filetype = "http",
-			}
+			-- Configuration disabled
 		end,
 		dependencies = {
-			{ "nvim-treesitter/nvim-treesitter-textobjects", event = "BufReadPre" },
+			{ "nvim-treesitter/nvim-treesitter-textobjects", enabled = true },
 			{
 				"windwp/nvim-ts-autotag",
-				event = "InsertEnter",
-				config = function()
-					require("nvim-treesitter.configs").setup({ autotag = { enable = true } })
-				end,
+				enabled = true,
 			},
-			--{ "OXY2DEV/markview.nvim" },
 		},
 	},
 
@@ -334,6 +320,7 @@ require("lazy").setup({
 	-- quickly select the closest text object among a group of candidates
 	{
 		"sustech-data/wildfire.nvim",
+		enabled = false, -- Disabled due to treesitter dependency
 		config = function()
 			require("wildfire").setup({
 				keymaps = {
@@ -504,6 +491,13 @@ require("lazy").setup({
 		},
 		config = function()
 			require("aerial").setup({
+				-- Disable problematic backends temporarily due to treesitter issues after reinstall
+				backends = { "lsp" }, -- Only use LSP backend for now
+				-- Configure to handle the case when backends aren't available
+				close_behavior = "auto",
+				default_direction = "prefer_right",
+				-- Disable automatic attachment to avoid errors
+				attach_mode = "window",
 				-- optionally use on_attach to set keymaps when aerial has attached to a buffer
 				on_attach = function(bufnr)
 					-- Jump forwards/backwards with '{' and '}'
@@ -550,6 +544,7 @@ require("lazy").setup({
 	{
 		"OXY2DEV/markview.nvim",
 		lazy = false,
+		enabled = false, -- Temporarily disable to troubleshoot treesitter issues
 		priority = 500, -- Lower priority than treesitter to ensure proper load order
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",
@@ -676,6 +671,27 @@ require("lazy").setup({
 			})
 		end,
 		enabled = false,
+	},
+
+	{
+		"hat0uma/csvview.nvim",
+		opts = {
+			parser = { comments = { "#", "//" } },
+			keymaps = {
+				-- Text objects for selecting fields
+				textobject_field_inner = { "if", mode = { "o", "x" } },
+				textobject_field_outer = { "af", mode = { "o", "x" } },
+				-- Excel-like navigation:
+				-- Use <Tab> and <S-Tab> to move horizontally between fields.
+				-- Use <Enter> and <S-Enter> to move vertically between rows and place the cursor at the end of the field.
+				-- Note: In terminals, you may need to enable CSI-u mode to use <S-Tab> and <S-Enter>.
+				jump_next_field_end = { "<Tab>", mode = { "n", "v" } },
+				jump_prev_field_end = { "<S-Tab>", mode = { "n", "v" } },
+				jump_next_row = { "<Enter>", mode = { "n", "v" } },
+				jump_prev_row = { "<S-Enter>", mode = { "n", "v" } },
+			},
+		},
+		cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
 	},
 })
 

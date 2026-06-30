@@ -250,6 +250,13 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
 		"additionalTextEdits",
 	},
 }
+-- Add explicit position encoding support for Neovim 0.12+
+capabilities.general = capabilities.general or {}
+capabilities.general.positionEncodings = { "utf-16", "utf-8" }
+
+-- Fix position encoding for all LSP operations
+capabilities.offsetEncoding = "utf-16"
+
 M.capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities) -- for nvim-cmp
 
 local opts = {

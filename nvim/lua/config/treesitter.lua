@@ -1,91 +1,73 @@
 local M = {}
 
-local treesitter_configs = require("nvim-treesitter.configs")
+local function setup_treesitter()
+	local status_ok, treesitter_configs = pcall(require, "nvim-treesitter.configs")
+	if not status_ok then
+		vim.notify("nvim-treesitter not found!", vim.log.levels.ERROR)
+		return
+	end
 
-local config = {
-	ensure_installed = "all", -- a list of parsers or "all"
-	ignore_install = { "phpdoc" }, -- list of parsers to ignore installing (for "all")
-	sync_install = false, -- install parsers synchronously
-	auto_install = true, -- automatically install missing parsers when entering buffer
-	highlight = {
-		enable = true, -- `false` will disable the whole extension
-		disable = { "css" }, -- list of parsers (not languages) to ignore
-		additional_vim_regex_highlighting = false, -- `true` or list of languages
-	},
-	autopairs = {
-		enable = true
-	},
-	indent = {
-		enable = true,
-		disable = { },
-	},
-	textobjects = {
-		select = {
-			enable = true,
+	-- Force using plugin parsers over system parsers to avoid conflicts
+	local install_ok, install = pcall(require, "nvim-treesitter.install")
+	if install_ok then
+		install.prefer_git = true
+	end
 
-			-- Automatically jump forward to textobj, similar to targets.vim
-			lookahead = true,
+	-- Add custom parser directory to runtime path
+	local parser_dir = vim.fn.stdpath("data") .. "/treesitter"
+	vim.opt.runtimepath:append(parser_dir)
 
-			keymaps = {
-				-- You can use the capture groups defined in textobjects.scm
-				["aA"] = "@attribute.outer",   --  1
-				["hA"] = "@attribute.inner",   --  2
-				["ab"] = "@block.outer",       --  3
-				["hb"] = "@block.inner",       --  4
-				["ac"] = "@call.outer",        --  5
-				["hc"] = "@call.inner",        --  6
-				["at"] = "@class.outer",       --  7
-				["ht"] = "@class.inner",       --  8
-				["a/"] = "@comment.outer",     --  9
-				["h/"] = "@comment.inner",     -- 
-				["ah"] = "@conditional.outer", -- 10
-				["hh"] = "@conditional.inner", -- 11
-				["aF"] = "@frame.outer",       -- 12
-				["hF"] = "@frame.inner",       -- 13
-				["af"] = "@function.outer",    -- 14
-				["hf"] = "@function.inner",    -- 15
-				["al"] = "@loop.outer",        -- 16
-				["hl"] = "@loop.inner",        -- 17
-				["aa"] = "@parameter.outer",   -- 18
-				["ha"] = "@parameter.inner",   -- 19
-				["hs"] = "@scopename.inner",   -- 20
-				["as"] = "@statement.outer",   -- 21
+	local config = {
+		parser_install_dir = parser_dir,
+		ensure_installed = {
+			-- Only install essential parsers to minimize issues
+			"lua",
+			"vim",
+			"vimdoc",
+			"markdown",
+			"markdown_inline",
+			"javascript",
+			"typescript",
+			"json",
+			"yaml",
+			"html",
+			"css",
+		},
+		ignore_install = { "phpdoc" },
+		sync_install = false,
+		auto_install = false, -- Disable auto-install to prevent issues
+		highlight = {
+			enable = false, -- Keep disabled until everything is stable
+			additional_vim_regex_highlighting = false,
+		},
+		autopairs = {
+			enable = false,
+		},
+		indent = {
+			enable = false,
+		},
+		textobjects = {
+			select = {
+				enable = false,
+			},
+			move = {
+				enable = false,
+			},
+			swap = {
+				enable = false,
 			},
 		},
-		move = {
-			enable = true,
-			set_jumps = true, -- whether to set jumps in the jumplist
-			goto_next_start = {
-				["]m"] = "@function.outer",
-				["]]"] = "@class.outer",
-			},
-			goto_next_end = {
-				["]M"] = "@function.outer",
-				["]["] = "@class.outer",
-			},
-			goto_previous_start = {
-				["[m"] = "@function.outer",
-				["[["] = "@class.outer",
-			},
-			goto_previous_end = {
-				["[M"] = "@function.outer",
-				["[]"] = "@class.outer",
-			},
-		},
-		swap = {
-			enable = true,
-			swap_next = {
-				["<leader>a"] = "@parameter.inner",
-			},
-			swap_previous = {
-				["<leader>A"] = "@parameter.inner",
-			},
-		},
-	},
-}
+	}
+
+	treesitter_configs.setup(config)
+end
 
 function M.setup()
-	treesitter_configs.setup(config)
+	-- Wrap in pcall to prevent errors from breaking the entire config
+	local ok, err = pcall(setup_treesitter)
+	if not ok then
+		vim.notify("Treesitter setup failed: " .. tostring(err), vim.log.levels.WARN)
+	end
 end
 
 return M

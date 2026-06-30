@@ -61,6 +61,12 @@ function M.setup(opts)
 		sources = sources,
 		on_attach = opts.on_attach,
 		root_dir = nls_utils.root_pattern(".git"),
+		-- Add explicit position encoding for Neovim 0.12+
+		capabilities = vim.tbl_deep_extend("force", opts.capabilities or {}, {
+			general = {
+				positionEncodings = { "utf-16", "utf-8" }
+			}
+		}),
 	})
 end
 

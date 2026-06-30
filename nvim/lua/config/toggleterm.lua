@@ -37,6 +37,9 @@ function M.setup()
 			border = "curved",
 		},
 	})
+
+	-- Add Ctrl+` as additional keybinding to toggle terminal
+	vim.keymap.set({ "n", "t" }, "<C-`>", "<cmd>ToggleTerm<cr>", { desc = "Toggle terminal" })
 end
 
 return M

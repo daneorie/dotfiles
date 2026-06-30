@@ -55,6 +55,13 @@ function M.setup()
 
 	-- Signature help configuration
 	vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, config.float)
+	
+	-- Fix for position encoding warning in Neovim 0.12+
+	local original_make_position_params = vim.lsp.util.make_position_params
+	vim.lsp.util.make_position_params = function(window, encoding)
+		encoding = encoding or 'utf-16'
+		return original_make_position_params(window, encoding)
+	end
 end
 
 return M
