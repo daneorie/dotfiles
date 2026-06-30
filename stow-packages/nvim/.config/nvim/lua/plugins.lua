@@ -684,6 +684,7 @@ require("lazy").setup({
 	-- Kitty Images
 	{
 		"3rd/image.nvim",
+		enabled = false,
 	},
 
 	-- Markdown Images
