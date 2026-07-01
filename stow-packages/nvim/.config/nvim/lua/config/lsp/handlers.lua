@@ -13,7 +13,7 @@ function M.setup()
 		vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = sign.name })
 	end
 
-	-- LSP handlers configuration
+	-- Diagnostic configuration (Neovim 0.12+ compatible)
 	local config = {
 		float = {
 			focusable = true,
@@ -50,11 +50,15 @@ function M.setup()
 	-- Diagnostic configuration
 	vim.diagnostic.config(config.diagnostic)
 
-	-- Hover configuration
-	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, config.float)
+	-- Hover configuration (Neovim 0.12+ compatible)
+	vim.lsp.handlers["textDocument/hover"] = function(err, result, ctx, cfg)
+		vim.lsp.handlers.hover(err, result, ctx, vim.tbl_extend("force", cfg or {}, config.float))
+	end
 
-	-- Signature help configuration
-	vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, config.float)
+	-- Signature help configuration (Neovim 0.12+ compatible)
+	vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, cfg)
+		vim.lsp.handlers.signature_help(err, result, ctx, vim.tbl_extend("force", cfg or {}, config.float))
+	end
 end
 
 return M

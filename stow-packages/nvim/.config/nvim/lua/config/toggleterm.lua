@@ -23,7 +23,7 @@ function M.setup()
 
 	toggleterm.setup({
 		size = 20,
-		open_mapping = { [[<c-`>]], [[<c-\>]] },
+		open_mapping = [[<c-\>]],
 		hide_numbers = true,
 		shade_terminals = true,
 		shading_factor = 2,
@@ -36,6 +36,20 @@ function M.setup()
 		float_opts = {
 			border = "curved",
 		},
+	})
+
+	-- Register <c-`> as an additional toggle key
+	vim.keymap.set("n", [[<c-`>]], '<Cmd>execute v:count . "ToggleTerm"<CR>', {
+		desc = "Toggle Terminal",
+		silent = true,
+	})
+	vim.keymap.set("i", [[<c-`>]], "<Esc><Cmd>ToggleTerm<CR>", {
+		desc = "Toggle Terminal",
+		silent = true,
+	})
+	vim.keymap.set("t", [[<c-`>]], "<Cmd>ToggleTerm<CR>", {
+		desc = "Toggle Terminal",
+		silent = true,
 	})
 end
 

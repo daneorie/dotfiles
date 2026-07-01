@@ -199,12 +199,24 @@ require("lazy").setup({
 					require("config.neoclip").setup()
 				end,
 			},
-			{
-				"ThePrimeagen/harpoon",
-				config = function()
-					require("config.harpoon").setup()
-				end,
+		{
+			"ThePrimeagen/harpoon",
+			keys = {
+				"<M-n>",
+				"<M-e>",
+				"<M-i>",
+				"<M-o>",
+				"<M-l>",
+				"<M-u>",
+				"<M-y>",
+				"<M-;>",
+				{ "<leader>ma", "<cmd>lua require('harpoon.mark').add_file<CR>", "n", desc = "Mark File" },
+				{ "<leader>me", "<cmd>lua require('harpoon.ui').toggle_quick_menu<CR>", "n", desc = "Show Marked Files" },
 			},
+			config = function()
+				require("config.harpoon").setup()
+			end,
+		},
 		},
 	},
 
@@ -636,6 +648,7 @@ require("lazy").setup({
 	-- Markdown
 	{
 		"jakewvincent/mkdnflow.nvim",
+		ft = { "markdown", "rmd" },
 		config = function()
 			require("config.mkdnflow").setup()
 		end,

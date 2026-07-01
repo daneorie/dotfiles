@@ -13,9 +13,6 @@ function M.setup()
 			priority = "current",
 		},
 		wrap = true,
-		perspective = {
-			priority = "current",
-		},
 		links = {
 			conceal = true,
 			transform_explicit = function(text)

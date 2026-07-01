@@ -20,7 +20,7 @@ alias cdu='cd-gitroot'
 alias less="$(brew --prefix)/Cellar/less/590/bin/less"
 alias excel="open -a /Applications/Microsoft\ Excel.app"
 alias refresh="exec $SHELL -l"
-alias wiki="nvim $WIKI_HOME/index.md"
+alias wiki="cd $WIKI_HOME && nvim index.md"
 
 # Git aliases
 alias g='git'

@@ -13,6 +13,7 @@ bindkey -M vicmd '^v' edit-command-line  # Edit command in nvim with Ctrl-v
 
 # Custom keybindings for Colemak layout
 # Circle of mappings: n -> h -> i -> k -> o -> l -> e -> j -> n
+bindkey -M viins '^[[Z' reverse-menu-complete
 bindkey -M vicmd "h" vi-insert
 bindkey -M vicmd "j" vi-repeat-search
 bindkey -M vicmd "k" vi-open-line-below

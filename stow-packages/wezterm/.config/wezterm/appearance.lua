@@ -14,7 +14,7 @@ local function apply_appearance(config)
 	config.use_fancy_tab_bar = false
 
 	-- Keyboard enhancements
-	config.enable_kitty_keyboard = true
+	--config.enable_kitty_keyboard = true
 	--config.enable_kitty_graphics = true
 
 	-- Apply platform-specific overrides
@@ -25,5 +25,5 @@ local function apply_appearance(config)
 end
 
 return {
-	apply_appearance = apply_appearance
+	apply_appearance = apply_appearance,
 }

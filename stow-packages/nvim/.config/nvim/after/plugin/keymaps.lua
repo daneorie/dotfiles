@@ -45,7 +45,8 @@ map({ "n", "x" }, "<C-q><C-q>", "require('telescope.builtin').quickfix()")
 --   jhkl 2134
 map({ "n", "x" }, "n", "h") -- arrow: left
 map({ "n", "x" }, "e", "j") -- arrow: down
-map({ "n", "x" }, "i", "k") -- arrow: up
+map("n", "i", "k") -- arrow: up (normal mode)
+map("x", "i", "k", { nowait = true }) -- arrow: up (visual mode, no disambiguation wait)
 map({ "n", "x" }, "o", "l") -- arrow: right
 map({ "n", "x" }, "h", "i") -- insert
 map({ "n", "x" }, "k", "o") -- newline insert

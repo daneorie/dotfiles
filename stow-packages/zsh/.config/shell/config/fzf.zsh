@@ -1,7 +1,7 @@
 # FZF Configuration
 
 # Load FZF if available
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f ~/.fzf.zsh ] && source <(fzf --zsh)
 
 # FZF options with custom keybindings
 export FZF_DEFAULT_OPTS='--bind=ctrl-e:down,ctrl-u:down,ctrl-y:up'
