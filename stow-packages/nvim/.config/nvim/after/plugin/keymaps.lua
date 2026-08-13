@@ -118,6 +118,15 @@ local tab_opts = {
 }
 whichkey.register(tab_keymaps, tab_opts)
 
+-- Mermaid keymaps
+whichkey.register({
+	m = {
+		name = "Mermaid",
+		p = "Toggle WezTerm pane preview",
+		d = "Show diagram hover (inline)",
+	},
+}, { mode = "n", prefix = "<leader>" })
+
 -- resize current buffer
 map({ "n", "v", "i" }, "<A-Left>", ":vertical resize -2<CR>") -- decrease width
 map({ "n", "v", "i" }, "<A-Down>", ":resize -2<CR>") -- decrease height
@@ -137,6 +146,16 @@ map("n", "_", "<C-w>s<C-w><Down>")
 -- Stay in visual mode after indenting
 map("x", "<", "<gv")
 map("x", ">", ">gv")
+
+-- Mermaid diagram preview
+map("n", "<leader>mp", function()
+	require("config.mermaid-preview").toggle()
+end)
+
+-- Mermaid health check command
+vim.api.nvim_create_user_command("MermaidHealth", function()
+	require("config.mermaid-preview").check_health()
+end, {})
 
 -- which-key
 silent_map({ "n", "v" }, "\x33[104;5u", ":WhichKey<CR>")

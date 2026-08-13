@@ -29,6 +29,12 @@ vim.cmd([[
 		autocmd User AlphaReady set showtabline=0 | autocmd BufUnload <buffer> set showtabline=2
 	augroup end
 
+	augroup _mermaid
+		autocmd!
+		autocmd BufRead,BufNewFile *.mmd setfiletype mermaid
+		autocmd FileType mermaid setlocal nowrap nospell
+	augroup end
+
 	augroup filetypedetect
 		au! BufRead,BufNewFile *.jsx setfiletype javascript
 	augroup END
