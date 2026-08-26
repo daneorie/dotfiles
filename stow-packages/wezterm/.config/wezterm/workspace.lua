@@ -5,10 +5,22 @@ local utils = require("utils")
 
 -- Repositories that use bare git repos (worktrees)
 local bare_repos = {
-	"mtgt",
-	"advent-of-code-2023",
+	"dotfiles",
+	"plan-your-day",
+	"global-fuelight-refuel-experience",
+	"global-fuelight-refuel-experience/feat",
+	"sports-fan365-backend",
+	"sports-fan365-backend/feature",
+	--"sports-fan365-backend-old",
+	--"sports-fan365-backend-old/feature",
 	"broski_orie",
-	"autoscan",
+	"captech-skills",
+	"arcolla-backend",
+	"arcolla-backend/feature",
+	"arcolavfd-web",
+	"arcolavfd-web/feature",
+	"mtgt",
+	--"advent-of-code-2023",
 }
 
 -- Create workspace selector for new workspaces
@@ -16,10 +28,13 @@ local function create_workspace_selector()
 	return wezterm.action_callback(function(window, pane)
 		local home = wezterm.glob(wezterm.home_dir)[1]
 		local workspaces = {
-			{ id = home .. "/dotfiles||dotfiles",           label = home .. "/dotfiles" },
-			{ id = home .. "/wiki||wiki",                   label = home .. "/wiki" },
-			{ id = home .. "/repos||repos",                 label = home .. "/repos" },
-			{ id = home .. "/.local/share/nvim/lazy||lazy", label = home .. "/.local/share/nvim/lazy" },
+			{ id = home .. "/dotfiles||dotfiles", label = home .. "/dotfiles" },
+			{ id = home .. "/wiki||wiki", label = home .. "/wiki" },
+			{ id = home .. "/repos||repos", label = home .. "/repos" },
+			{
+				id = "|ssh -i ~/.ssh/personal.rsa daneorie@macbook-pro.local|personal",
+				label = "ssh macbook-pro.local",
+			},
 		}
 
 		-- Add all GitHub repos except the bare repos (worktrees)

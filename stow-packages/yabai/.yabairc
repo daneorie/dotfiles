@@ -124,5 +124,7 @@ yabai -m rule --add manage=off label="off:iPhone Mirroring" app="^iPhone Mirrori
 yabai -m rule --add manage=off label="off:Discord" app="^Discord$"
 yabai -m rule --add manage=off label="off:System Information|" app="^System Information$" title="^$"
 yabai -m rule --add manage=off label="off:Backblaze Downloader|Backblaze Downloader" app="^Backblaze Downloader$" title="^Backblaze Downloader$"
+yabai -m rule --add manage=off label="off:Microsoft Outlook|Accounts" app="^Microsoft Outlook$" title="^Accounts$"
+yabai -m rule --add manage=off label="off:Karabiner-Updater" app="^Karabiner-Updater$" title="^$"
 
 echo "yabai configuration loaded..."

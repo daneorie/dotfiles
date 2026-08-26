@@ -190,6 +190,34 @@ local function normal_keymap()
 		--	c = { [[<cmd>lua require('refactoring').debug.cleanup({})<cr>]], "Debug Cleanup" },
 		--},
 
+		r = {
+			name = "Reminders",
+			m = {
+				name = "Reminders",
+				e = { ":RemindMeEvery ", "Remind Me Every (minutes)" },
+				a = { ":RemindMeAt ", "Remind Me At (hour, 24h)" },
+				i = { ":RemindMeIn ", "Remind Me In (minutes)" },
+				d = {
+					name = "Daily",
+					a = { ":RemindMeDailyAt ", "Remind Me Daily At (hour, 24h)" },
+				},
+				c = { "<cmd>ReminderClose<CR>", "Reminder Close" },
+				r = {
+					name = "Remove",
+					z = { "<cmd>ReminderRemoveAll<CR>", "Reminder Remove All" },
+					a = { ":ReminderRemoveAt ", "Reminder Remove At" },
+				},
+				f = {
+					name = "Focus Mode",
+					o = { "<cmd>ReminderFocusModeOff<CR>", "Focus Mode Off" },
+					m = { "<cmd>ReminderFocusModeOn<CR>", "Focus Mode On" },
+				},
+				b = { "<cmd>ReminderBriefing<CR>", "Reminder Briefing" },
+				n = { "<cmd>ReminderNew<CR>", "Reminder New" },
+				l = { "<cmd>ReminderList<CR>", "Reminder List" },
+			},
+		},
+
 		s = {
 			name = "Search",
 			o = { [[ <Esc><Cmd>lua require('spectre').open()<cr>]], "Open" },

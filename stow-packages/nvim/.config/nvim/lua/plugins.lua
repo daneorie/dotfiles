@@ -12,6 +12,9 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Disable certain plugins when running in VSCode
+local not_vscode = not vim.g.vscode
+
 require("lazy").setup({
 	git = { timeout = 240 },
 
@@ -36,6 +39,7 @@ require("lazy").setup({
 	-- Colorschemes
 	{
 		"EdenEast/nightfox.nvim",
+		cond = not_vscode,
 		config = function()
 			vim.cmd.colorscheme([[nightfox]])
 		end,
@@ -77,9 +81,12 @@ require("lazy").setup({
 			})
 			vim.cmd([[hi OctoEditable guibg=none]])
 		end,
+		enabled = false,
 	},
+	-- Diffview
 	{
 		"sindrets/diffview.nvim",
+		cond = not_vscode,
 		config = function()
 			require("config.diffview").setup()
 		end,
@@ -111,6 +118,7 @@ require("lazy").setup({
 	--},
 	{
 		"numToStr/Navigator.nvim",
+		cond = not_vscode,
 		config = function()
 			require("config.navigator").setup()
 		end,
@@ -137,6 +145,7 @@ require("lazy").setup({
 	{
 		"nvim-lualine/lualine.nvim",
 		event = "BufReadPre",
+		cond = not_vscode,
 		config = function()
 			require("config.lualine").setup()
 		end,
@@ -149,7 +158,7 @@ require("lazy").setup({
 		lazy = false,
 		build = ":TSUpdate",
 		config = function()
-			require("nvim-treesitter").setup {}
+			require("nvim-treesitter").setup({})
 			require("config.treesitter").setup()
 		end,
 		dependencies = {
@@ -168,6 +177,7 @@ require("lazy").setup({
 	{
 		"nvim-telescope/telescope.nvim",
 		event = { "VimEnter" },
+		cond = not_vscode,
 		config = function()
 			require("config.telescope").setup()
 		end,
@@ -179,7 +189,7 @@ require("lazy").setup({
 			"LinArcX/telescope-env.nvim",
 			"daneorie/telescope-insert-path.nvim",
 			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-			{ "LukasPietzschmann/telescope-tabs",         config = true },
+			{ "LukasPietzschmann/telescope-tabs", config = true },
 			{
 				"nvim-telescope/telescope-ui-select.nvim",
 				config = function()
@@ -199,30 +209,36 @@ require("lazy").setup({
 					require("config.neoclip").setup()
 				end,
 			},
-		{
-			"ThePrimeagen/harpoon",
-			keys = {
-				"<M-n>",
-				"<M-e>",
-				"<M-i>",
-				"<M-o>",
-				"<M-l>",
-				"<M-u>",
-				"<M-y>",
-				"<M-;>",
-				{ "<leader>ma", "<cmd>lua require('harpoon.mark').add_file<CR>", "n", desc = "Mark File" },
-				{ "<leader>me", "<cmd>lua require('harpoon.ui').toggle_quick_menu<CR>", "n", desc = "Show Marked Files" },
+			{
+				"ThePrimeagen/harpoon",
+				keys = {
+					"<M-n>",
+					"<M-e>",
+					"<M-i>",
+					"<M-o>",
+					"<M-l>",
+					"<M-u>",
+					"<M-y>",
+					"<M-;>",
+					{ "<leader>ma", "<cmd>lua require('harpoon.mark').add_file<CR>", "n", desc = "Mark File" },
+					{
+						"<leader>me",
+						"<cmd>lua require('harpoon.ui').toggle_quick_menu<CR>",
+						"n",
+						desc = "Show Marked Files",
+					},
+				},
+				config = function()
+					require("config.harpoon").setup()
+				end,
 			},
-			config = function()
-				require("config.harpoon").setup()
-			end,
-		},
 		},
 	},
 
 	-- Debugging
 	{
 		"mfussenegger/nvim-dap",
+		cond = not_vscode,
 		dependencies = {
 			"theHamsta/nvim-dap-virtual-text",
 			"nvim-neotest/nvim-nio",
@@ -245,6 +261,7 @@ require("lazy").setup({
 	-- File Explorer
 	{
 		"stevearc/oil.nvim",
+		cond = not_vscode,
 		config = function()
 			require("config.oil").setup()
 		end,
@@ -254,6 +271,7 @@ require("lazy").setup({
 	{
 		"hrsh7th/nvim-cmp",
 		event = "InsertEnter",
+		cond = not_vscode,
 		config = function()
 			require("config.cmp").setup()
 		end,
@@ -281,12 +299,14 @@ require("lazy").setup({
 	{
 		"neovim/nvim-lspconfig",
 		lazy = true, -- loaded by Mason and typescript-tools
+		cond = not_vscode,
 	},
 
 	-- LSP Management
 	{
 		"williamboman/mason.nvim",
 		build = ":MasonUpdate",
+		cond = not_vscode,
 		config = function()
 			require("mason").setup({
 				ui = {
@@ -304,6 +324,7 @@ require("lazy").setup({
 	{
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = { "mason.nvim" },
+		cond = not_vscode,
 		config = function()
 			require("config.lsp.mason-config").setup()
 		end,
@@ -311,6 +332,7 @@ require("lazy").setup({
 	{
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 		dependencies = { "mason.nvim" },
+		cond = not_vscode,
 		config = function()
 			require("mason-tool-installer").setup({
 				ensure_installed = { "codelldb", "stylua", "shfmt", "shellcheck", "prettierd" },
@@ -322,35 +344,42 @@ require("lazy").setup({
 	{
 		"jayp0521/mason-null-ls.nvim",
 		dependencies = { "mason.nvim" },
+		cond = not_vscode,
 	},
 
 	-- LSP Utilities
 	{
 		"b0o/schemastore.nvim",
 		lazy = true,
+		cond = not_vscode,
 	},
 	{
 		"nvimtools/none-ls.nvim",
 		dependencies = { "nvim-lua/plenary.nvim" },
+		cond = not_vscode,
 		config = function()
 			require("config.lsp.null-ls").setup()
 		end,
 	},
 	{
 		"lvimuser/lsp-inlayhints.nvim",
+		cond = not_vscode,
 		config = function()
 			require("config.lsp.lsp-inlayhints").setup()
 		end,
 	},
 	{
 		"ray-x/lsp_signature.nvim",
+		cond = not_vscode,
 		config = true,
 	},
 	{
 		"pierreglaser/folding-nvim",
+		cond = not_vscode,
 	},
 	{
 		"RRethy/vim-illuminate",
+		cond = not_vscode,
 		config = function()
 			require("config.illuminate").setup()
 		end,
@@ -358,18 +387,21 @@ require("lazy").setup({
 	{
 		"j-hui/fidget.nvim",
 		tag = "legacy",
+		cond = not_vscode,
 		config = function()
 			require("fidget").setup()
 		end,
 	},
 	{
 		"SmiteshP/nvim-navic",
+		cond = not_vscode,
 		config = function()
 			require("nvim-navic").setup()
 		end,
 	},
 	{
 		"https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+		cond = not_vscode,
 		config = function()
 			require("lsp_lines").setup()
 		end,
@@ -380,6 +412,7 @@ require("lazy").setup({
 		"akinsho/toggleterm.nvim",
 		keys = { [[<C-`>]], [[<C-\>]] },
 		cmd = { "ToggleTerm", "TermExec" },
+		cond = not_vscode,
 		config = function()
 			require("config.toggleterm").setup()
 		end,
@@ -402,6 +435,7 @@ require("lazy").setup({
 	-- Fuzzy Finder/Telescope/Navigation
 	{
 		"junegunn/fzf.vim",
+		cond = not_vscode,
 		dependencies = { "junegunn/fzf", build = ":call fzf#install()" },
 	},
 	{
@@ -420,9 +454,11 @@ require("lazy").setup({
 	{
 		"neoclide/coc.nvim", -- a fast code completion engine
 		branch = "release",
+		cond = not_vscode,
 	},
 	{
 		"folke/zen-mode.nvim",
+		cond = not_vscode,
 		config = function()
 			require("config.zen-mode").setup()
 		end,
@@ -535,6 +571,7 @@ require("lazy").setup({
 	-- TypeScript / JavaScript
 	{
 		"pmizio/typescript-tools.nvim",
+		cond = not_vscode,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"neovim/nvim-lspconfig",
@@ -547,6 +584,7 @@ require("lazy").setup({
 		"mrcjkb/rustaceanvim",
 		version = "^5",
 		lazy = false,
+		cond = not_vscode,
 		ft = { "rust" },
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -555,6 +593,7 @@ require("lazy").setup({
 	{
 		"saecki/crates.nvim",
 		event = { "BufRead Cargo.toml" },
+		cond = not_vscode,
 		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
 			require("crates").setup({
@@ -569,6 +608,7 @@ require("lazy").setup({
 	-- Task Runner and Job Management
 	{
 		"stevearc/overseer.nvim",
+		cond = not_vscode,
 		opts = {},
 	},
 
@@ -576,6 +616,7 @@ require("lazy").setup({
 	{
 		"ray-x/go.nvim",
 		ft = { "go" },
+		cond = not_vscode,
 		config = function()
 			require("go").setup()
 		end,
@@ -586,6 +627,7 @@ require("lazy").setup({
 	{
 		"mfussenegger/nvim-jdtls",
 		ft = { "java" },
+		cond = not_vscode,
 	},
 
 	-- Scratch Buffer
@@ -596,6 +638,7 @@ require("lazy").setup({
 	-- Dimming inactive panes
 	{
 		"levouh/tint.nvim",
+		cond = not_vscode,
 		config = function()
 			require("tint").setup()
 		end,
@@ -604,6 +647,7 @@ require("lazy").setup({
 	-- Aerial
 	{
 		"stevearc/aerial.nvim",
+		cond = not_vscode,
 		opts = {},
 		dependencies = {
 			"nvim-tree/nvim-web-devicons",
@@ -631,6 +675,7 @@ require("lazy").setup({
 	-- Trouble
 	{
 		"folke/trouble.nvim",
+		cond = not_vscode,
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		opts = {},
 	},
@@ -657,6 +702,7 @@ require("lazy").setup({
 	{
 		"OXY2DEV/markview.nvim",
 		lazy = false,
+		cond = not_vscode,
 		priority = 500, -- Lower priority than treesitter to ensure proper load order
 		dependencies = {
 			"nvim-tree/nvim-web-devicons",
@@ -670,6 +716,7 @@ require("lazy").setup({
 	{
 		"iamcco/markdown-preview.nvim",
 		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		cond = not_vscode,
 		ft = { "markdown" },
 		build = function()
 			vim.fn["mkdp#util#install"]()
@@ -684,6 +731,7 @@ require("lazy").setup({
 	},
 	{
 		"3rd/diagram.nvim",
+		cond = not_vscode,
 		dependencies = {
 			{ "3rd/image.nvim", opts = {} }, -- you'd probably want to configure image.nvim manually instead of doing this
 		},
@@ -738,6 +786,7 @@ require("lazy").setup({
 	-- Better navigation with Tab
 	{
 		"boltlessengineer/smart-tab.nvim",
+		cond = not_vscode,
 		config = function()
 			require("smart-tab").setup()
 		end,
@@ -747,6 +796,7 @@ require("lazy").setup({
 	-- Improved quickfix list
 	{
 		"kevinhwang91/nvim-bqf",
+		cond = not_vscode,
 		config = function()
 			require("bqf").setup({
 				func_map = {
@@ -766,12 +816,18 @@ require("lazy").setup({
 	-- Kitty Images
 	{
 		"3rd/image.nvim",
-		enabled = false,
+		build = false, -- so that it doesn't build the rock https://github.com/3rd/image.nvim/issues/91#issuecomment-2453430239
+		cond = not_vscode,
+		opts = {
+			processor = "magick_cli",
+		},
+		enabled = true,
 	},
 
 	-- Markdown Images
 	{
 		"edluffy/hologram.nvim",
+		cond = not_vscode,
 		config = function()
 			require("hologram").setup({
 				auto_display = true, -- WIP automatic markdown image display, may be prone to breaking
@@ -789,6 +845,7 @@ require("lazy").setup({
 	{
 		"mrjones2014/smart-splits.nvim",
 		lazy = false,
+		cond = not_vscode,
 		config = function()
 			-- these keymaps will also accept a range,
 			--vim.keymap.set('n', '<A-n>', require('smart-splits').resize_left)
@@ -806,6 +863,33 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader><leader>i", require("smart-splits").swap_buf_up)
 			vim.keymap.set("n", "<leader><leader>o", require("smart-splits").swap_buf_right)
 		end,
+	},
+
+	-- Timers and Reminders
+	{
+		"nvzone/timerly",
+		dependencies = "nvzone/volt",
+		cmd = "TimerlyToggle",
+		cond = not_vscode,
+		opts = {}, -- optional
+	},
+	{
+		"rodolfojsv/reminders.nvim",
+		cond = not_vscode,
+		config = function()
+			require("config.reminders").setup()
+		end,
+	},
+
+	{
+		"NStefan002/screenkey.nvim",
+		lazy = false,
+		cond = not_vscode,
+		version = "*", -- or branch = "main", to use the latest commit
+	},
+	{
+		"d2lang/d2-vim",
+		ft = { "d2" },
 	},
 })
 

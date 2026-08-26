@@ -3,7 +3,7 @@
 # Application directories
 export NVIM_HOME=~/.config/nvim
 export MAVEN_HOME=~/apache-maven-3.8.1
-export WIKI_HOME=~/wiki
+export WIKI_HOME=~/Documents/wiki
 export XDG_CONFIG_HOME="$HOME/.config"
 
 # Editor and pager configuration
@@ -50,3 +50,7 @@ fi
 # Initialize development tools
 eval "$(jenv init -)"
 eval "$(rbenv init - zsh)"
+
+### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
+export PATH="/Users/dorie/.rd/bin:$PATH"
+### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)

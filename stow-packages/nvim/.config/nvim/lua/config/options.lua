@@ -37,6 +37,7 @@ local options = {
 	tabstop = 4,                                             -- insert 4 spaces for a tab
 	--termguicolors = true,                                    -- set term gui colors (most terminals support this)
 	timeoutlen = 1000,                                       -- time to wait for a mapped sequence to complete (in milliseconds)
+	ttimeoutlen = 10,                                        -- time to wait for terminal key codes (in milliseconds)
 	undofile = true,                                         -- enable persistent undo
 	updatetime = 300,                                        -- faster completion (4000ms default)
 	wrap = false,                                            -- display lines as one long line

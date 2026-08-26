@@ -85,6 +85,11 @@ function M.get_repo_name()
   return ""
 end
 
+function M.get_git_root(path)
+  local git_dir = vim.fs.find(".git", { upward = true, path = path or vim.fn.expand("%:p:h") })
+  return git_dir[1] and vim.fs.dirname(git_dir[1]) or nil
+end
+
 -- function M.nvim_version(val)
 --   local version = (vim.version().major .. "." .. vim.version().minor) + 0.0
 --   val = val or 0.7

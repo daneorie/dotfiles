@@ -6,6 +6,7 @@ function M.setup()
 			MkdnNewListItem = { "i", "<CR>" },
 			MkdnNewListItemBelowInsert = { "n", "k" },
 			MkdnNewListItemAboveInsert = { "n", "K" },
+			MkdnToggleToDo = { { "n", "v" }, "<leader>x" },
 			MkdnFoldSection = { "n", "<leader>fs" },
 			MkdnUnfoldSection = { "n", "<leader>Fs" },
 		},

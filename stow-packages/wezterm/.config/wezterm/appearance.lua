@@ -17,6 +17,9 @@ local function apply_appearance(config)
 	--config.enable_kitty_keyboard = true
 	--config.enable_kitty_graphics = true
 
+	-- Terminal type (requires wezterm.terminfo to be installed)
+	config.term = "wezterm"
+
 	-- Apply platform-specific overrides
 	local _, _, platform_config = utils.get_platform_config()
 	for key, value in pairs(platform_config) do

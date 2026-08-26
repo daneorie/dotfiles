@@ -83,6 +83,7 @@ GUI_PACKAGES=(
 )
 
 OTHER_PACKAGES=(
+	"agents"
 	"scripts"
 )
 

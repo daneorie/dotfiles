@@ -14,6 +14,10 @@ function mergeMain {
 	cd ../main && git pull && git merge main && npm run install:all
 }
 
+function mergeDev {
+	cd ../dev && git pull && git merge dev && npm ci
+}
+
 # Text processing functions
 function reverseOrder {
 	grep -n "" | sort -rn | sed 's/^[0-9]*://'
