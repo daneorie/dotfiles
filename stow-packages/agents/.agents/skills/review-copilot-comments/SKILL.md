@@ -65,7 +65,11 @@ GraphQL: Resource protected by organization SAML enforcement. You must grant you
 
 ## Fetch Comments Workflow
 
-**Only unresolved review threads are fetched.** Threads marked resolved are skipped. Outdated threads (`isOutdated: true`) are still included — check whether a follow-up comment already addressed them before acting.
+The skill fetches two categories of Copilot feedback:
+1. **Inline thread comments** — review-thread-scoped comments within file diffs
+2. **Top-level "Copilot review overview" comments** — summary reviews listing open findings with `discussion_r<id>` anchors
+
+**Note:** Only unresolved inline review threads are fetched directly via `reviewThreads`. Top-level overview comments are fetched separately via the `reviews` endpoint (they can remain "open" even if underlying inline threads are marked resolved on GitHub). Outdated threads are still included — check whether a follow-up comment already addressed them before acting.
 
 ### Step 1: Get PR Details
 
@@ -155,7 +159,42 @@ gh pr view {number} --json comments \
   --jq '[.comments[] | select(.authorAssociation == "BOT" or (.author.login | test("copilot|github-advanced-security"; "i"))) | {body, author: .author.login, id: .databaseId}]'
 ```
 
-### Step 3b: Fetch All Top-Level Comments
+### Step 3b: Fetch Copilot Review Overview (Recommended)
+
+```bash
+gh api graphql -f query='
+query($owner: String!, $repo: String!, $number: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $number) {
+      reviews(first: 50) {
+        nodes {
+          databaseId
+          state
+          author { login }
+          body
+        }
+      }
+    }
+  }
+}' -f owner="{owner}" -f repo="{repo}" -F number={number} \
+--jq '[.data.repository.pullRequest.reviews.nodes[]
+  | select(.author.login == "copilot-pull-request-reviewer" and (.body | test("ccr-overview-v2"; "")))
+  | {id: .databaseId, author: .author.login, body}]
+  | sort_by(.id) | .[-1]' 2>&1
+```
+
+**Extract finding IDs from the overview body:**
+The overview contains an "Open (N)" section with links like `[comment text](#discussion_r4041458569)`. Extract each `discussion_r<id>` anchor and resolve it to the full inline comment:
+
+```bash
+# For each discussion_rXXXX found in the overview, fetch the full comment:
+gh api repos/{owner}/{repo}/pulls/comments/{id} \
+  --jq '{id, path, line, body, author: .user.login}'
+```
+
+Where `{id}` is the numeric ID without the "r" prefix (e.g. `discussion_r4041458569` → `4041458569`).
+
+### Step 3c: Fetch All Top-Level Comments
 
 ```bash
 gh pr view {number} --json comments \
@@ -164,13 +203,17 @@ gh pr view {number} --json comments \
 
 ## Planning Phase
 
-After fetching, the skill will:
+After fetching both inline threads and top-level overview findings, the skill will:
 
-1. **Summarize all comments** grouped by file, with author, line number, and body
-2. **Identify suggested changes** — note which comments include inline diff suggestions that can guide the fix
-3. **Handle cherry-picks** — if the user specified particular comments, present the full list and confirm the subset to address before building the todo list
-4. **Create a TodoWrite list** with one item per comment, in priority/dependency order
-5. **Present the full plan** to the user and wait for confirmation before starting execution
+1. **Merge all findings** from inline threads (Step 2a/2b) and overview-derived comments (Step 3b resolved to full comments)
+2. **Relevance check** — some findings (especially from the review overview) may already be addressed in the current code. Before adding to the todo list, verify each finding against the file content at the indicated line(s):
+   - If the code already addresses the finding, flag it as "Already resolved — no action needed; will note in reply"
+   - If the finding is still valid, add it to the todo list
+3. **Summarize all comments** grouped by file, with author, line number, and body
+4. **Identify suggested changes** — note which comments include inline diff suggestions that can guide the fix
+5. **Handle cherry-picks** — if the user specified particular comments, present the full list and confirm the subset to address before building the todo list
+6. **Create a TodoWrite list** with one item per valid/actionable comment, in priority/dependency order
+7. **Present the full plan** to the user and wait for confirmation before starting execution
 
 ## Execution Phase
 
@@ -226,13 +269,48 @@ Once the user confirms:
 
 1. **Push the branch** (`git push`)
 2. **Report the push result** and confirm commits are now on GitHub
-3. **Post all PR comment replies in one batch**:
-   ```bash
-   gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
-     -f body="Fixed in [{commit_sha}](https://github.com/{owner}/{repo}/commit/{commit_sha}) — {brief description of what was changed}."
-   ```
-   - Each reply references its commit SHA as a markdown hyperlink
-   - Commits are now resolvable on GitHub after the push
+3. **Post all PR comment replies in one batch** using one of three patterns based on the finding's source:
+
+### Reply Pattern 1: True Inline Replies (Nested under a comment thread)
+When a finding originates from an inline review comment and you post a true nested reply via the `/replies` endpoint, GitHub's threading automatically ties the reply to the comment — no extra hyperlink is needed.
+
+```bash
+gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies \
+  -f body="Fixed in [{commit_sha}](https://github.com/{owner}/{repo}/commit/{commit_sha}) — {brief description of what was changed}."
+```
+
+### Reply Pattern 2: Review-Overview-Only Findings (No inline comment exists)
+When a finding exists only in a review overview body (e.g., "Previously missed" items) and has no corresponding inline comment, post a top-level PR comment with a leading `Addressing:` line that hyperlinks to the review overview and explicitly names the finding title so readers can locate it within the collapsed overview sections.
+
+```bash
+gh pr comment {number} --body "Addressing: [{finding_title}]({review_overview_url}#pullrequestreview-{review_id})
+
+Fixed in [{commit_sha}](https://github.com/{owner}/{repo}/commit/{commit_sha}) — {detailed description of what was changed}."
+```
+
+For findings that are already resolved (no code change needed):
+```bash
+gh pr comment {number} --body "Addressing: [{finding_title}]({review_overview_url}#pullrequestreview-{review_id})
+
+{Explanation of what already addresses the finding, e.g., existing tests, current implementation, etc.}"
+```
+
+### Reply Pattern 3: Fallback Top-Level Comments for Inline Findings
+If posting a true nested reply via `/replies` is not possible/available, but you need to reply to an inline comment, post a top-level PR comment with a leading `Addressing:` line that hyperlinks to the inline comment (`#discussion_r<id>`) so the connection is explicit:
+
+```bash
+gh pr comment {number} --body "Addressing: [comment]({inline_comment_url}#discussion_r{comment_id})
+
+Fixed in [{commit_sha}](https://github.com/{owner}/{repo}/commit/{commit_sha}) — {description}."
+```
+
+---
+
+**Key rules:**
+- **Inline-threaded replies** (Pattern 1): No extra link needed — GitHub's threading is automatic.
+- **Review-overview-only findings** (Pattern 2): Always include a hyperlink to the review overview + explicit finding title in the `Addressing:` line, since there's no comment to nest under.
+- **Fallback top-level comments for inline findings** (Pattern 3): Include the `#discussion_r<id>` link in the `Addressing:` line so the connection is unambiguous.
+
 4. **Report completion** with the PR URL
 
 ## Summary
