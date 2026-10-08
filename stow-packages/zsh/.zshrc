@@ -13,10 +13,6 @@ source "$ZSH_CONFIG_DIR/prompt.zsh"       # Prompt configuration
 source "$ZSH_CONFIG_DIR/fzf.zsh"          # FZF fuzzy finder configuration
 source "$ZSH_CONFIG_DIR/mtgt.zsh"         # mtgt: environment variables, PATH, completions, aliases, and functions
 
-# Dedup PATH entries
-export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':' | sed 's/:$//')
-export TSTRUCT_TOKEN="tstruct_eyJ2ZXJzaW9uIjoxLCJkYXRhIjp7InVzZXJJRCI6MTY5NTU1OTkwMCwidXNlckVtYWlsIjoiZGFuZS5vcmllQGljbG91ZC5jb20iLCJ0ZWFtSUQiOjE2MTY3ODk4MjQsInRlYW1OYW1lIjoiZGFuZS5vcmllQGljbG91ZC5jb20ncyB0ZWFtIiwicmVuZXdhbERhdGUiOiIyMDI2LTA4LTIzVDIwOjE1OjQ4LjgwNzg4MjM3MloiLCJjcmVhdGVkQXQiOiIyMDI2LTA4LTE2VDIwOjE1OjQ4LjgwNzg4MjYwMloifSwic2lnbmF0dXJlIjoiZk55MG5wbHAvNnBDazNVeXFwUG44U1pRMHRUUDNmQjZzeWNnUW5VK2UzTk91bUMzTFY0b21LS3pEZE9vRzZVWkQyN291YzhQODRMS1VOaklIcGJaQWc9PSJ9"
-
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
 export PATH="/Users/dorie/.rd/bin:$PATH"
 ### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)

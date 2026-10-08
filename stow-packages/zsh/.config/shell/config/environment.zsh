@@ -6,6 +6,9 @@ export MAVEN_HOME=~/apache-maven-3.8.1
 export WIKI_HOME=~/Documents/wiki
 export XDG_CONFIG_HOME="$HOME/.config"
 
+# Pipx configuration
+export PIPX_BIN_DIR="$HOME/.local/bin"
+
 # Editor and pager configuration
 export EDITOR=nvim
 export PAGER=nvimpager
@@ -21,9 +24,9 @@ export AWS_PROFILE_DEV=GR_GG_COF_AWS_${AWS_DEV}_Developer
 export AWS_PROFILE_QA=GR_GG_COF_AWS_${AWS_QA}_Developer
 export AWS_PROFILE=${AWS_PROFILE_DEV}
 
-# Homebrew path
+# Homebrew path - Prepend to ensure Homebrew tools take precedence
 if [[ -n "/usr/local/bin/brew" ]]; then
-	export PATH="$PATH:/opt/homebrew/bin"
+	export PATH="/opt/homebrew/bin:$PATH"
 fi
 
 # PATH management - Add new paths to this list
@@ -32,7 +35,7 @@ paths_to_add=(
 	"$MAVEN_HOME/bin"
 	"$HOME/.jenv/bin"
 	"$HOME/Library/Python/3.11/bin"
-	"/Users/daneorie/.local/bin"  # pipx
+	"$HOME/.local/bin"  # pipx
 )
 
 # Add paths to PATH if they don't already exist
@@ -54,3 +57,12 @@ eval "$(rbenv init - zsh)"
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
 export PATH="/Users/dorie/.rd/bin:$PATH"
 ### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/dorie/Downloads/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/dorie/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/dorie/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/dorie/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
+
+# Dedup PATH entries
+export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':' | sed 's/:$//')

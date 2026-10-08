@@ -4,6 +4,7 @@ local act = wezterm.action
 local utils = require("utils")
 local neovim = require("neovim")
 local workspace = require("workspace")
+local opencode = require("opencode")
 
 local function setup_keybindings(config)
 	local SUPER, META = utils.get_platform_config()
@@ -69,6 +70,7 @@ local function setup_keybindings(config)
 
 		-- Workspace management
 		{ key = "w",          mods = "CTRL|SHIFT",         action = workspace.create_new_workspace() },
+		{ key = "o",          mods = "CTRL|SHIFT",         action = opencode.show_session_picker() },
 		{
 			key = "t",
 			mods = "CTRL|SHIFT",

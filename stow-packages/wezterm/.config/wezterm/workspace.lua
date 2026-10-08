@@ -6,21 +6,26 @@ local utils = require("utils")
 -- Repositories that use bare git repos (worktrees)
 local bare_repos = {
 	"dotfiles",
-	"plan-your-day",
 	"global-fuelight-refuel-experience",
 	"global-fuelight-refuel-experience/feat",
-	"sports-fan365-backend",
-	"sports-fan365-backend/feature",
+	"global-fuelight-ml-deployment",
+	"broski_orie",
+	"mtgt",
+
+	--OLD
+	--"plan-your-day",
+	--"sports-fan365-backend",
+	--"sports-fan365-backend/feature",
+	--"captech-skills",
+	--"arcolla-backend",
+	--"arcolla-backend/feature",
+	--"arcolavfd-web",
+	--"arcolavfd-web/feature",
+
+	--UNUSED
+	--"advent-of-code-2023",
 	--"sports-fan365-backend-old",
 	--"sports-fan365-backend-old/feature",
-	"broski_orie",
-	"captech-skills",
-	"arcolla-backend",
-	"arcolla-backend/feature",
-	"arcolavfd-web",
-	"arcolavfd-web/feature",
-	"mtgt",
-	--"advent-of-code-2023",
 }
 
 -- Create workspace selector for new workspaces
@@ -177,4 +182,3 @@ return {
 	switch_workspace_selector = switch_workspace_selector,
 	create_new_workspace = create_new_workspace,
 }
-
